@@ -12,8 +12,8 @@ inputs:
     required: true
   license-type:
     description: 'License type to activate (professional or personal)'
-    required: true
-    default: 'personal'
+    required: false
+    default: 'Personal'
 runs:
   using: 'node16'
   main: 'index.js'
