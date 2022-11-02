@@ -18,4 +18,4 @@ runs:
   using: 'node16'
   main: 'index.js'
   post: 'post.js'
-  post-if: inputs.license-type == 'professional' || inputs.license-type == 'Professional' || inputs.license-type == 'pro' || inputs.license-type == 'Pro'
+  post-if: ${{ inputs.license-type == 'professional' || inputs.license-type == 'Professional' || inputs.license-type == 'pro' || inputs.license-type == 'Pro' }}
