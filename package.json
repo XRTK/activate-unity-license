@@ -1,0 +1,25 @@
+{
+  "name": "activate-unity-license",
+  "version": "1.0.0",
+  "description": "An atomic GitHub Action that activates the Unity Engine license via cli with the provided secret parameters.",
+  "main": "index.js",
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XRTK/activate-unity-license.git"
+  },
+  "keywords": [],
+  "author": "Stephen Hodgson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/XRTK/activate-unity-license/issues"
+  },
+  "homepage": "https://github.com/XRTK/activate-unity-license#readme"
+}

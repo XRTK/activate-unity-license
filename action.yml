@@ -1,0 +1,23 @@
+name: 'Unity License Activation (XRTK)'
+description: 'Runs Unity with the provided options'
+branding:
+  icon: 'at-sign'
+  color: 'blue'
+inputs:
+  editor-path:
+    description: 'Path to the Unity Editor'
+    required: true
+  project-path:
+    description: 'Path to the Unity project'
+    required: true
+  name:
+    description: 'Name of the Unity Action'
+    required: false
+    default: 'Unity'
+runs:
+  using: 'node16'
+  pre: 'pre.js'
+  pre-if: ''
+  main: 'index.js'
+  post: 'post.js'
+  post-if: ''
