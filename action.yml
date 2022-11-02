@@ -10,10 +10,6 @@ inputs:
   project-path:
     description: 'Path to the Unity project'
     required: true
-  name:
-    description: 'Name of the Unity Action'
-    required: false
-    default: 'Unity'
 runs:
   using: 'node16'
   pre: 'pre.js'

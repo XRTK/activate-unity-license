@@ -1,0 +1,33 @@
+name: validate
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - '*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout self
+        uses: actions/checkout@v3
+
+      - uses: xrtk/unity-validate@v2
+
+      - id: activate-unity-license
+        name: Unity Editor Validation
+        uses: ./
+        with:
+          editor-path: ${{ env.editor-path }}
+          project-path: ${{ env.project-path }}
