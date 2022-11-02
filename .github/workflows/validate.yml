@@ -23,7 +23,15 @@ jobs:
       - name: checkout self
         uses: actions/checkout@v3
 
+      - name: checkout test project
+        uses: actions/checkout@v3
+        with:
+          repository: xrtk/com.xrtk.com
+          path: test-project
+
       - uses: xrtk/unity-validate@v2
+        with:
+          version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
       - id: activate-unity-license
         name: Unity Editor Validation
