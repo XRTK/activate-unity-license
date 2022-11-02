@@ -12,6 +12,6 @@ inputs:
     required: true
 runs:
   using: 'node16'
-  #pre: 'pre.js'
+  pre: 'pre.js'
   main: 'index.js'
-  #post: 'post.js'
+  post: 'post.js'
