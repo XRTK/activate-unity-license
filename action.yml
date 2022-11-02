@@ -13,7 +13,5 @@ inputs:
 runs:
   using: 'node16'
   pre: 'pre.js'
-  pre-if: ''
   main: 'index.js'
   post: 'post.js'
-  post-if: ''
