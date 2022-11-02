@@ -8,10 +8,10 @@ const main = async () => {
         var licenseType = core.getInput('license-type');
         console.log(`Activating ${licenseType} Unity License`);
         var pwsh = await io.which("pwsh", true);
+        await exec.exec(`"${pwsh}" -Command`, `Write-Host "Hello World!"`);
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
-            await exec.exec(`"${pwsh}" -Command`, `Write-Host "Hello World!"`);
             console.log('-quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX');
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
         } else if (licenseType.toLowerCase().startsWith('per')) {
