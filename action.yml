@@ -12,7 +12,7 @@ inputs:
     required: true
   license-type:
     description: 'License type to activate (professional or personal)'
-    required: false
+    required: true
     default: 'personal'
 runs:
   using: 'node16'
