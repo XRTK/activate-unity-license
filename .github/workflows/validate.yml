@@ -26,7 +26,7 @@ jobs:
       - name: checkout test project
         uses: actions/checkout@v3
         with:
-          repository: xrtk/com.xrtk.com
+          repository: xrtk/com.xrtk.test
           path: test-project
 
       - uses: xrtk/unity-validate@v2
