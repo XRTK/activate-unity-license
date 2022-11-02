@@ -9,7 +9,7 @@ const main = async () => {
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
-            await exec.exec(`pwsh echo hello world`);
+            await exec.exec(`pwsh`, [`-f`, `echo hello world!`]);
             console.log('-quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX');
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
         } else if (licenseType.toLowerCase().startsWith('per')) {
