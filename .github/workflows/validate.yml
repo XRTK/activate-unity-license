@@ -23,6 +23,8 @@ jobs:
       - name: checkout self
         uses: actions/checkout@v3
 
+      - run: npm install
+
       # - name: checkout test project
       #   uses: actions/checkout@v3
       #   with:
