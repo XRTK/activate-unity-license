@@ -3,8 +3,20 @@ const github = require('@actions/github');
 
 const main = async () => {
     try {
-        console.log(`Main: Hello World!`);
+        var licenseType = core.getInput('license-type');
+        console.log(`Activating ${licenseType} Unity License`);
 
+        if (licenseType.toLowerCase().startsWith('pro')) {
+            console.log('-quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX');
+            // if pro/plus license activate by using UNITY_SERIAL env variable
+            // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
+        } else if (licenseType.toLowerCase().startsWith('per')) {
+            console.log('-batchmode -manualLicenseFile UnityLicenseRequest.ulf');
+            // if personal license activate by using UNITY_PERSONAL_LICENSE env variable
+            // -batchmode -manualLicenseFile .\UnityLicenseRequest.ulf
+        } else {
+            core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
+        }
     } catch (error) {
         core.setFailed(error.message);
     }

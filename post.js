@@ -3,7 +3,9 @@ const github = require('@actions/github');
 
 const main = async () => {
     try {
-        console.log(`Post: Hello World!`);
+        // return license if pro/plus
+        console.log('-quit -batchmode -returnlicense -username name@example.com -password XXXXXXXXXXXXX');
+        // -quit -batchmode -returnlicense -username name@example.com -password XXXXXXXXXXXXX
     } catch (error) {
         core.setFailed(error.message);
     }

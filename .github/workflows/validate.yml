@@ -39,5 +39,6 @@ jobs:
         name: Unity Editor Validation
         uses: ./
         with:
+          license-type: 'Personal'
           editor-path: ${{ env.editor-path }}
           project-path: ${{ env.project-path }}
