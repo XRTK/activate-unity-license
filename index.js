@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const exec = require('@actions/exec');
 
 const main = async () => {
     try {
@@ -7,8 +8,9 @@ const main = async () => {
         console.log(`Activating ${licenseType} Unity License`);
 
         if (licenseType.toLowerCase().startsWith('pro')) {
-            console.log('-quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX');
             // if pro/plus license activate by using UNITY_SERIAL env variable
+            await exec.exec(`pwsh echo hello world`);
+            console.log('-quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX');
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
         } else if (licenseType.toLowerCase().startsWith('per')) {
             console.log('-batchmode -manualLicenseFile UnityLicenseRequest.ulf');
