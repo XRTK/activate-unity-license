@@ -9,11 +9,16 @@ const path = require('path');
 
 const main = async () => {
     try {
-        var licenseType = core.getInput('license-type');
         var editorPath = core.getInput('editor-path');
-        var projectPath = core.getInput('project-path');
+
+        if (!editorPath) {
+            throw Error("Missing editor-path input");
+        }
+
+        var licenseType = core.getInput('license-type');
 
         console.log(`Activating ${licenseType} Unity License`);
+
         var pwsh = await io.which("pwsh", true);
 
         if (licenseType.toLowerCase().startsWith('pro')) {
