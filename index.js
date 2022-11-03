@@ -9,7 +9,7 @@ const path = require('path');
 
 const main = async () => {
     try {
-        var editorPath = core.getInput('editor-path');
+        var editorPath = "TEST_EDITOR_PATH";//core.getInput('editor-path');
 
         if (!editorPath) {
             throw Error("Missing editor-path input");
