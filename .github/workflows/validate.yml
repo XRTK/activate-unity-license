@@ -43,7 +43,6 @@ jobs:
         uses: ./
         with:
           editor-path: ${{ env.editor-path }}
-        env:
           username: ${{ secrets.UNITY_USERNAME }}
           license: ${{ secrets.UNITY_PERSONAL_LICENSE }}
           password: ${{ secrets.UNITY_PASSWORD }}
