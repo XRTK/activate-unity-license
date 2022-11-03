@@ -34,7 +34,7 @@ try {
     $additionalArgs = $additionalArgs.Trim()
 
     if ( $additionalArgs -like "*runEditorTests" ) {
-        $testPath = "$logName.xml"
+        $testPath = "$fullLogName.xml"
         $additionalArgs += " -editorTestsResultFile `"$testPath`""
     }
 
