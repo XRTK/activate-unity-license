@@ -11,12 +11,12 @@ const main = async () => {
     try {
         var licenseType = core.getInput('license-type');
         var editorPath = core.getInput('editor-path');
+        var projectPath = core.getInput('project-path');
 
         console.log(`Activating ${licenseType} Unity License`);
         var pwsh = await io.which("pwsh", true);
-        var projectPath = core.getInput('project-path');
-
-        await exec.exec(`"${pwsh}" -Command`, `Write-Host "Hello ${env.UNITY_USERNAME}! ${projectPath}"`);
+        var activate = path.resolve(__dirname, 'activate-license.ps1');
+        await exec.exec(`"${pwsh}" -Command`, activate);
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
@@ -26,12 +26,6 @@ const main = async () => {
             // if personal license activate by using UNITY_PERSONAL_LICENSE env variable
             console.log('-batchmode -manualLicenseFile UnityLicenseRequest.ulf');
             // -batchmode -manualLicenseFile .\UnityLicenseRequest.ulf
-
-            //var exitcode = await exec.exec(`"${pwsh}" -Command`, `Start-Process "${editorPath}" -ArgumentList "-batchmode -manualLicenseFile \"${ulfPath}\""`);
-
-            // if (exitcode!=0) {
-            //     core.setFailed(`Activation failed!`)
-            // }
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
         }

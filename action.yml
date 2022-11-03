@@ -22,7 +22,7 @@ inputs:
     description: 'Unity Password'
     required: true
     default: ''
-  license-file:
+  license:
     description: '.ulf license file contents (Only used for Personal license type)'
     required: false
   serial:

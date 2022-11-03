@@ -44,3 +44,6 @@ jobs:
         with:
           editor-path: ${{ env.editor-path }}
           project-path: ${{ env.project-path }}
+        env:
+          username: ${{ secrets.UNITY_USERNAME }}
+          license: ${{ secrets.UNITY_PERSONAL_LICENSE }}
