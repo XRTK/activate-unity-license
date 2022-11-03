@@ -4,7 +4,7 @@ param(
     [String]$projectPath,
     [String]$buildTarget,
     [String]$additionalArgs,
-    [String]$name = "Unity"
+    [String]$logName = "Unity"
 )
 
 try {
@@ -26,8 +26,8 @@ try {
         Write-Host "Log Directory: $logDirectory"
 
         $date = Get-Date -Format "yyyyMMddTHHmmss"
-        $logName = "$logDirectory/$name-$date"
-        $logPath = "$logName.log"
+        $fullLogName = "$logDirectory/$logName-$date"
+        $logPath = "$fullLogName.log"
         $buildArgs += "-logfile `"$logPath`" ";
     }
 
