@@ -8,31 +8,39 @@ param(
 )
 
 try {
-    $additionalArgs = $additionalArgs.Trim()
-    $buildTargetArgs = ""
+    $buildArgs = ""
 
     if ( -not [string]::IsNullOrEmpty($buildTarget) ) {
-        $buildTargetArgs = "-buildTarget `"$buildTarget`" "
+        $buildArgs += "-buildTarget `"$buildTarget`" "
     }
 
-    $logDirectory = "$projectPath/Builds/Logs"
+    if (-not [String]::IsNullOrEmpty($projectPath)) {
+        $buildArgs += "-projectPath `"$projectPath`" "
 
-    if ( -not (Test-Path -Path $logDirectory)) {
-        $logDirectory = New-Item -ItemType Directory -Force -Path $logDirectory | Select-Object
+        $logDirectory = "$projectPath/Builds/Logs"
+
+        if ( -not (Test-Path -Path $logDirectory)) {
+            $logDirectory = New-Item -ItemType Directory -Force -Path $logDirectory | Select-Object
+        }
+
+        Write-Host "Log Directory: $logDirectory"
+
+        $date = Get-Date -Format "yyyyMMddTHHmmss"
+        $logName = "$logDirectory/$name-$date"
+        $logPath = "$logName.log"
+        $buildArgs += "-logfile `"$logPath`" ";
     }
 
-    Write-Host "Log Directory: $logDirectory"
-
-    $date = Get-Date -Format "yyyyMMddTHHmmss"
-    $logName = "$logDirectory/$name-$date"
-    $logPath = "$logName.log"
+    $additionalArgs = $additionalArgs.Trim()
 
     if ( $additionalArgs -like "*runEditorTests" ) {
         $testPath = "$logName.xml"
         $additionalArgs += " -editorTestsResultFile `"$testPath`""
     }
 
-    $buildArgs = "$buildTargetArgs-projectPath `"$projectPath`" -logfile `"$logPath`" $additionalArgs"
+    $buildArgs = $buildArgs.Trim()
+
+    $buildArgs += " $additionalArgs"
     Write-Host "::group::$editorPath $buildArgs"
 
     $process = Start-Process -FilePath "$editorPath" -ArgumentList "$buildArgs" -PassThru
