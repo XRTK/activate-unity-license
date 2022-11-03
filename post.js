@@ -26,7 +26,7 @@ const main = async () => {
             var unity_action = path.resolve(__dirname, 'unity-action.ps1');
             // -quit -batchmode -returnlicense -username name@example.com -password XXXXXXXXXXXXX
             var args = `quit -batchmode -returnlicense -username ${username} -password ${password}`;
-            await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs ${args} -logName ReturnLicense`);
+            await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName ReturnLicense`);
         }
     } catch (error) {
         core.setFailed(error.message);

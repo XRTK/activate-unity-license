@@ -41,7 +41,7 @@ const main = async () => {
 
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
             var args = `-quit -batchmode -username ${username} -password ${password} -serial ${serial}`;
-            await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs ${args} -logName ProLicenseActivation`);
+            await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using UNITY_PERSONAL_LICENSE env variable
             var generateUlf = path.resolve(__dirname, 'generate-ulf.ps1');
@@ -56,7 +56,7 @@ const main = async () => {
 
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
             var args = `-batchmode -manualLicenseFile "${licenseFilePath}"`;
-            await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs ${args} -logName PersonalLicenseActivation`);
+            await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
         }
