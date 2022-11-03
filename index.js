@@ -46,7 +46,7 @@ const main = async () => {
             // if personal license activate by using UNITY_PERSONAL_LICENSE env variable
             var generateUlf = path.resolve(__dirname, 'generate-ulf.ps1');
             var licenseFilePath = path.resolve(__dirname, 'license.ulf');
-            var licenseInfo = core.getMultilineInput('license');
+            var licenseInfo = core.getInput('license');
 
             if (!licenseInfo) {
                 throw Error('Missing license input');
