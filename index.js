@@ -55,7 +55,7 @@ const main = async () => {
             await exec.exec(`"${pwsh}" -Command`, `${generateUlf} -path "${licenseFilePath}" -licenseInfo "${licenseInfo}"`);
 
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            var args = `-batchmode -manualLicenseFile \"${licenseFilePath}\"`;
+            var args = `-quit -batchmode -manualLicenseFile \"${licenseFilePath}\"`;
             await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
