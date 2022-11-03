@@ -51,7 +51,7 @@ const main = async () => {
                 throw Error('Missing license input');
             }
 
-            await exec.exec(`"${pwsh}" -Command`, `${generateUlf} -path ${licenseFilePath} -licenseInfo ${licenseInfo}`);
+            await exec.exec(`"${pwsh}" -Command`, `${generateUlf} -path "${licenseFilePath}" -licenseInfo "${licenseInfo}"`);
 
             // "$EditorPath -batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
             await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -batchmode -manualLicenseFile "${licenseFilePath}"`);
