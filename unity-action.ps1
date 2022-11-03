@@ -4,7 +4,7 @@ param(
     [String]$projectPath,
     [String]$buildTarget,
     [String]$additionalArgs,
-    [String]$name
+    [String]$name = "Unity"
 )
 
 try {
