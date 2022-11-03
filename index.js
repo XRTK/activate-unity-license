@@ -29,9 +29,9 @@ const main = async () => {
 
             //var exitcode = await exec.exec(`"${pwsh}" -Command`, `Start-Process "${editorPath}" -ArgumentList "-batchmode -manualLicenseFile \"${ulfPath}\""`);
 
-            if (exitcode!=0) {
-                core.setFailed(`Activation failed!`)
-            }
+            // if (exitcode!=0) {
+            //     core.setFailed(`Activation failed!`)
+            // }
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
         }
