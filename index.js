@@ -15,17 +15,15 @@ const main = async () => {
 
         console.log(`Activating ${licenseType} Unity License`);
         var pwsh = await io.which("pwsh", true);
-        var activate = path.resolve(__dirname, 'activate-license.ps1');
-        await exec.exec(`"${pwsh}" -Command`, activate);
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
-            console.log('-quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX');
-            // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
+            var activatePro = path.resolve(__dirname, 'activate-pro-license.ps1');
+            await exec.exec(`"${pwsh}" -Command`, `${activatePro} -EditorPath "${editorPath}"`);
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using UNITY_PERSONAL_LICENSE env variable
-            console.log('-batchmode -manualLicenseFile UnityLicenseRequest.ulf');
-            // -batchmode -manualLicenseFile .\UnityLicenseRequest.ulf
+            var activatePersonal = path.resolve(__dirname, 'activate-personal-license.ps1');
+            await exec.exec(`"${pwsh}" -Command`, `${activatePersonal} -EditorPath "${editorPath}"`);
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
         }
