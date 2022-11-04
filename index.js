@@ -73,10 +73,15 @@ const main = async () => {
                 file : alfPath,
                 username : username,
                 password : password,
-                authKey : '',
                 serial : serial,
                 out : __dirname,
-              }).run();
+            })
+            .run()
+            .then(_ => process.exit(0))
+            .catch(e => {
+                console.error(e.message);
+                process.exit(1);
+            });
 
             files = await findByExtension(__dirname, '.ulf')[0];
             var ulfPath = files[0];
