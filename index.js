@@ -60,7 +60,8 @@ const main = async () => {
                 console.error(error.message);
             }
 
-            var alfPath = await findByExtension(__dirname, '.alf')[0];
+            var files = await findByExtension(__dirname, '.alf');
+            var alfPath = files[0];
 
             console.log(`License Request alf Path ${alfPath}`);
 
@@ -77,7 +78,8 @@ const main = async () => {
                 out : __dirname,
               }).run();
 
-            var ulfPath = await findByExtension(__dirname, '.ulf')[0];
+            files = await findByExtension(__dirname, '.ulf')[0];
+            var ulfPath = files[0];
 
             console.log(`ulf file: ${ulfPath}`);
 
@@ -114,9 +116,8 @@ const findByExtension = async (dir, ext) => {
     const files = await readdir(dir);
 
     for (const file of files) {
-        console.log(`found: ${file}`);
-
         if (file.endsWith(`.${ext}`)) {
+            console.log(`found: ${file}`);
             matchedFiles.push(file);
         }
     }
