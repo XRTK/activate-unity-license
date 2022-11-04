@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const io = require('@actions/io');
 const path = require('path');
-const glob = require('glob');
+const { readdir } = require('fs/promises');
 
 const { Activator } = require('unity-activate');
 
@@ -14,6 +14,18 @@ const main = async () => {
             throw Error("Missing editor-path input");
         }
 
+        var username = core.getInput('username');
+
+        if (!username) {
+            throw Error('Missing username input');
+        }
+
+        var password = core.getInput('password');
+
+        if (!password) {
+            throw Error('Missing password input');
+        }
+
         var licenseType = core.getInput('license-type');
 
         console.log(`Activating ${licenseType} Unity License`);
@@ -23,17 +35,6 @@ const main = async () => {
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
-            var username = core.getInput('username');
-
-            if (!username) {
-                throw Error('Missing username input');
-            }
-
-            var password = core.getInput('password');
-
-            if (!password) {
-                throw Error('Missing password input');
-            }
 
             var serial = core.getInput('serial');
 
@@ -59,17 +60,16 @@ const main = async () => {
                 console.error(error.message);
             }
 
-            var licenseRequestPath = path.resolve(__dirname, 'Unity*.alf');
-            console.log(`License Request Path ${licenseFilePath}`);
+            var alfPath = await findByExtension(__dirname, '.alf')[0];
 
-            if (!licenseFilePath) {
+            console.log(`License Request alf Path ${alfPath}`);
+
+            if (!alfPath) {
                 throw Error(`Failed to find generated license alf request file!`)
             }
 
-            console.log(`alf file: ${licenseFilePath}`);
-
             await new Activator({
-                file : licenseRequestPath,
+                file : alfPath,
                 username : username,
                 password : password,
                 authKey : '',
@@ -77,12 +77,16 @@ const main = async () => {
                 out : __dirname,
               }).run();
 
-            var licenseFilePath = path.resolve(__dirname, 'Unity*.ulf');
+            var ulfPath = await findByExtension(__dirname, '.ulf')[0];
 
-            console.log(`ulf file: ${licenseFilePath}`);
+            console.log(`ulf file: ${ulfPath}`);
+
+            if (!ulfPath) {
+                throw Error(`Failed to find manual license ulf file!`)
+            }
 
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            args = `-quit -nographics -batchmode -manualLicenseFile \"${licenseFilePath}\"`;
+            args = `-quit -nographics -batchmode -manualLicenseFile \"${ulfPath}\"`;
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
@@ -103,3 +107,18 @@ const main = async () => {
 
 // Call the main function to run the action
 main();
+
+const findByExtension = async (dir, ext) => {
+    const matchedFiles = [];
+
+    const files = await readdir(dir);
+
+    for (const file of files) {
+        // Method 2:
+        if (file.endsWith(`.${ext}`)) {
+            matchedFiles.push(file);
+        }
+    }
+
+    return matchedFiles;
+};
