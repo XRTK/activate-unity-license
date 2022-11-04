@@ -42,7 +42,7 @@ const main = async () => {
             }
 
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
-            var args = `-quit -batchmode -username ${username} -password ${password} -serial ${serial}`;
+            var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ProLicenseActivation`);
 
             if (exitCode != 0) {
@@ -50,23 +50,20 @@ const main = async () => {
             }
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
-            var args = "-batchmode -createManualActivationFile"
+            var args = `-quit -nographics -batchmode -createManualActivationFile -username ${username} -password ${password}`
             var exitCode = 0;
 
             try {
-                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseRequest`);
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
             } catch (error) {
-                throw Error(`Failed to generate manual license request! ${error.message}`);
+                console.error(error.message);
             }
 
-            if (exitCode != 0) {
-                throw Error(`Failed to generate license request! errorCode: ${exitCode}`);
-            }
-
-            var licenseRequestPath = path.resolve(__dirname, '*.alf');
+            var licenseRequestPath = path.resolve(__dirname, 'Unity*.alf');
+            console.log(`License Request Path ${licenseFilePath}`);
 
             if (!licenseFilePath) {
-                throw Error(`Failed to find generated license alf request file path`)
+                throw Error(`Failed to find generated license alf request file!`)
             }
 
             console.log(`alf file: ${licenseFilePath}`);
@@ -80,12 +77,12 @@ const main = async () => {
                 out : __dirname,
               }).run();
 
-            var licenseFilePath = path.resolve(__dirname, '*.ulf');
+            var licenseFilePath = path.resolve(__dirname, 'Unity*.ulf');
 
             console.log(`ulf file: ${licenseFilePath}`);
 
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            args = `-quit -batchmode -manualLicenseFile \"${licenseFilePath}\"`;
+            args = `-quit -nographics -batchmode -manualLicenseFile \"${licenseFilePath}\"`;
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
