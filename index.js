@@ -51,8 +51,13 @@ const main = async () => {
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
             var args = "-batchmode -createManualActivationFile"
+            var exitCode = 0;
 
-            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseRequest`);
+            try {
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseRequest`);
+            } catch (error) {
+                throw Error(`Failed to generate license request! ${error.message}`);
+            }
 
             if (exitCode != 0) {
                 throw Error(`Failed to generate license request! errorCode: ${exitCode}`);
@@ -82,7 +87,11 @@ const main = async () => {
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
             args = `-quit -batchmode -manualLicenseFile \"${licenseFilePath}\"`;
 
-            exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
+            try {
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
+            } catch (error) {
+                throw Error(`Failed to activate license! ${error.message}`);
+            }
 
             if (exitCode != 0) {
                 throw Error(`Failed to activate license! errorCode: ${exitCode}`);
@@ -91,7 +100,7 @@ const main = async () => {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
         }
     } catch (error) {
-        core.setFailed(error.message);
+        core.setFailed(`Unity License Activation Failed! ${error.message}`);
     }
 }
 
