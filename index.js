@@ -114,7 +114,8 @@ const findByExtension = async (dir, ext) => {
     const files = await readdir(dir);
 
     for (const file of files) {
-        // Method 2:
+        console.log(`found: ${file}`);
+
         if (file.endsWith(`.${ext}`)) {
             matchedFiles.push(file);
         }
