@@ -2,7 +2,9 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const io = require('@actions/io');
 const path = require('path');
-const { env } = require('process');
+const glob = require('glob');
+
+const { Activator } = require('unity-activate');
 
 const main = async () => {
     try {
@@ -47,21 +49,40 @@ const main = async () => {
                 throw Error(`Failed to activate license! errorCode: ${exitCode}`);
             }
         } else if (licenseType.toLowerCase().startsWith('per')) {
-            // if personal license activate by using UNITY_PERSONAL_LICENSE env variable
-            var generateUlf = path.resolve(__dirname, 'generate-ulf.ps1');
-            var licenseFilePath = path.resolve(__dirname, 'license.ulf');
-            var licenseInfo = core.getInput('license');
+            // if personal license activate by using requesting activation file
+            var args = "-batchmode -createManualActivationFile"
 
-            if (!licenseInfo) {
-                throw Error('Missing license input');
+            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseRequest`);
+
+            if (exitCode != 0) {
+                throw Error(`Failed to generate license request! errorCode: ${exitCode}`);
             }
 
-            await exec.exec(`"${pwsh}" -Command`, `${generateUlf} -path "${licenseFilePath}" -licenseInfo "${licenseInfo}"`);
+            var licenseRequestPath = path.resolve(__dirname, '*.alf');
+
+            if (!licenseFilePath) {
+                throw Error(`Failed to find generated license alf request file path`)
+            }
+
+            console.log(`alf file: ${licenseFilePath}`);
+
+            await new Activator({
+                file : licenseRequestPath,
+                username : username,
+                password : password,
+                authKey : '',
+                serial : serial,
+                out : __dirname,
+              }).run();
+
+            var licenseFilePath = path.resolve(__dirname, '*.ulf');
+
+            console.log(`ulf file: ${licenseFilePath}`);
 
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            var args = `-quit -batchmode -manualLicenseFile \"${licenseFilePath}\"`;
+            args = `-quit -batchmode -manualLicenseFile \"${licenseFilePath}\"`;
 
-            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
+            exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
 
             if (exitCode != 0) {
                 throw Error(`Failed to activate license! errorCode: ${exitCode}`);

@@ -42,8 +42,7 @@ jobs:
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
-      - id: activate-unity-license
-        name: Unity Editor Validation
+      - name: activate unity license
         uses: ./
         with:
           editor-path: ${{ env.editor-path }}
