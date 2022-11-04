@@ -51,7 +51,7 @@ const main = async () => {
             }
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
-            var args = `-quit -nographics -batchmode -createManualActivationFile -username ${username} -password ${password}`
+            var args = `-quit -nographics -batchmode -createManualActivationFile` //-username ${username} -password ${password}
             var exitCode = 0;
 
             try {
