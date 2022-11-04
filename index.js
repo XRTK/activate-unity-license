@@ -63,7 +63,7 @@ const main = async () => {
             var files = await findByExtension(__dirname, '.alf');
             var alfPath = files[0];
 
-            console.log(`License Request alf Path ${alfPath}`);
+            console.log(`alf Path: "${alfPath}"`);
 
             if (!alfPath) {
                 throw Error(`Failed to find generated license alf request file!`)
@@ -86,7 +86,7 @@ const main = async () => {
             files = await findByExtension(__dirname, '.ulf')[0];
             var ulfPath = files[0];
 
-            console.log(`ulf file: ${ulfPath}`);
+            console.log(`ulf file: "${ulfPath}"`);
 
             if (!ulfPath) {
                 throw Error(`Failed to find manual license ulf file!`)
@@ -117,14 +117,11 @@ main();
 
 const findByExtension = async (dir, ext) => {
     const matchedFiles = [];
-
     const files = await readdir(dir);
 
     for (const file of files) {
         if (file.endsWith(ext)) {
-            var fullPath = path.resolve(dir, file);
-            console.log(`found: ${fullPath}`);
-            matchedFiles.push(fullPath);
+            matchedFiles.push(path.resolve(dir, file));
         }
     }
 
