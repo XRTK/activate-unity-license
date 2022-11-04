@@ -56,7 +56,7 @@ const main = async () => {
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseRequest`);
             } catch (error) {
-                throw Error(`Failed to generate license request! ${error.message}`);
+                throw Error(`Failed to generate manual license request! ${error.message}`);
             }
 
             if (exitCode != 0) {

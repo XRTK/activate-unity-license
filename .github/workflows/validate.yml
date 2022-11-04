@@ -20,8 +20,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            build-target: StandaloneLinux64
+          # - os: ubuntu-latest
+          #   build-target: StandaloneLinux64
           - os: windows-latest
             build-target: StandaloneWindows64
           - os: macos-latest
