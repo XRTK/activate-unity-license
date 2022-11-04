@@ -24,8 +24,8 @@ const main = async () => {
 
             var pwsh = await io.which("pwsh", true);
             var unity_action = path.resolve(__dirname, 'unity-action.ps1');
-            // -quit -batchmode -returnlicense -username name@example.com -password XXXXXXXXXXXXX
-            var args = `-quit -batchmode -returnlicense -username ${username} -password ${password}`;
+            // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
+            var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ReturnLicense`);
 
             if (exitCode != 0) {
