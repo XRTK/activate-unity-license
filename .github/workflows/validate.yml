@@ -39,6 +39,9 @@ jobs:
 
       - run: npm install
 
+      - uses: xrtk/unity-setup@v1
+        with:
+          version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
       - name: activate unity license
         uses: ./
         with:
