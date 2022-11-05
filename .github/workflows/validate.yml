@@ -43,7 +43,7 @@ jobs:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
       - name: activate unity license
-        uses: ./dist/index.js
+        uses: ./
         with:
           username: ${{ secrets.UNITY_USERNAME }}
           license: ${{ secrets.UNITY_PERSONAL_LICENSE }}
