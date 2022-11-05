@@ -27,7 +27,9 @@ https://docs.github.com/en/actions/managing-workflow-runs/approving-workflow-run
 
 This action requires several secrets that need to be setup in the repository or organization's action secret store.
 
-*
+* `UNITY_USERNAME`
+* `UNITY_PASSWORD`
+* `UNITY_SERIAL` (used for pro/plus activations)
 
 ### Create Workflow file
 
@@ -62,5 +64,5 @@ jobs:
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
-          serial: ${{ secrets.UNITY_SERIAL }}
+          serial: ${{ secrets.UNITY_SERIAL }} # Used for pro/plus activations
 ```
