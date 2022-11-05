@@ -77,10 +77,8 @@ const main = async () => {
                 out : __dirname,
             })
             .run()
-            .then(_ => process.exit(0))
             .catch(e => {
-                console.error(e.message);
-                process.exit(1);
+                throw Error(e.message);
             });
 
             files = await findByExtension(__dirname, '.ulf')[0];
