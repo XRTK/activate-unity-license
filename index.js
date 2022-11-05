@@ -73,8 +73,8 @@ const main = async () => {
                 file : alfPath,
                 username : username,
                 password : password,
-                key : '',
-                serial : serial,
+                key : '', // use of 2FA isn't recommended for automated workflows
+                serial : '', // intentionally left blank for personal license
                 out : __dirname,
             })
             .run()
@@ -82,7 +82,7 @@ const main = async () => {
                 throw Error(e.message);
             });
 
-            files = await findByExtension(__dirname, '.ulf')[0];
+            files = await findByExtension(__dirname, '.ulf');
             var ulfPath = files[0];
 
             console.log(`ulf file: "${ulfPath}"`);

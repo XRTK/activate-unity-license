@@ -7,9 +7,6 @@ inputs:
   editor-path:
     description: 'Path to the Unity Editor'
     required: true
-  project-path:
-    description: 'Path to the Unity project'
-    required: true
   license-type:
     description: 'License type to activate (professional or personal)'
     required: false
