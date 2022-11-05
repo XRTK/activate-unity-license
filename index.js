@@ -26,6 +26,12 @@ const main = async () => {
             throw Error('Missing password input');
         }
 
+        var serial = core.getInput('serial');
+
+        if (!serial) {
+            throw Error('Missing serial input');
+        }
+
         var licenseType = core.getInput('license-type');
 
         console.log(`Activating ${licenseType} Unity License`);
@@ -35,12 +41,6 @@ const main = async () => {
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
-
-            var serial = core.getInput('serial');
-
-            if (!serial) {
-                throw Error('Missing serial input');
-            }
 
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
             var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
@@ -73,6 +73,7 @@ const main = async () => {
                 file : alfPath,
                 username : username,
                 password : password,
+                key : '',
                 serial : serial,
                 out : __dirname,
             })
