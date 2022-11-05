@@ -50,8 +50,3 @@ jobs:
           license: ${{ secrets.UNITY_PERSONAL_LICENSE }}
           password: ${{ secrets.UNITY_PASSWORD }}
           serial: ${{ secrets.UNITY_SERIAL }}
-
-      - name: Unity Build (${{ matrix.build-target }})
-        uses: xrtk/unity-build@refactored-unity-action-test
-        with:
-          build-target: ${{ matrix.build-target }}
