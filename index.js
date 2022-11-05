@@ -4,7 +4,7 @@ const io = require('@actions/io');
 const path = require('path');
 const { readdir } = require('fs/promises');
 
-const { Activator } = require('unity-activate');
+const { Activator } = require('@emoko/unity-activate');
 
 const main = async () => {
     try {
