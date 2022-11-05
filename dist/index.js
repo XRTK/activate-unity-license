@@ -54001,11 +54001,7 @@ const main = async () => {
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
             } catch (error) {
-                throw Error(`Failed to activate license! ${error.message}`);
-            }
-
-            if (exitCode != 0) {
-                throw Error(`Failed to activate license! errorCode: ${exitCode}`);
+                console.error(error.message);
             }
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
