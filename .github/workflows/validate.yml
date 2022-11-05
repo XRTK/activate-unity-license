@@ -36,6 +36,8 @@ jobs:
           repository: xrtk/com.xrtk.test
           path: test-project
 
+      - run: npm install
+
       - uses: xrtk/unity-setup@main
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
