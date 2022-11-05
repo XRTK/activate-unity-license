@@ -43,7 +43,7 @@ jobs:
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
-      - name:Aactivate Unity license
+      - name: Activate Unity license
         uses: ./
         with:
           username: ${{ secrets.UNITY_USERNAME }}
