@@ -47,8 +47,8 @@ jobs:
         uses: ./
         with:
           username: ${{ secrets.UNITY_USERNAME }}
-          license: ${{ secrets.UNITY_PERSONAL_LICENSE }}
           password: ${{ secrets.UNITY_PASSWORD }}
+          license-type: 'Personal'
           serial: ${{ secrets.UNITY_SERIAL }}
 
       - name: Unity Build (${{ matrix.build-target }})
