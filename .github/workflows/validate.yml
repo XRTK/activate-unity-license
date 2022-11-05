@@ -20,12 +20,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            build-target: StandaloneLinux64
-          - os: windows-latest
+          #- os: ubuntu-latest
+          #  build-target: StandaloneLinux64
+          - os: windows
             build-target: StandaloneWindows64
-          - os: macos-latest
-            build-target: StandaloneOSX
+          #- os: macos-latest
+          #  build-target: StandaloneOSX
+
     steps:
       - name: checkout self
         uses: actions/checkout@v3
@@ -37,10 +38,6 @@ jobs:
           path: test-project
 
       - run: npm install
-
-      - uses: xrtk/unity-setup@v1
-        with:
-          version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
       - name: activate unity license
         uses: ./
