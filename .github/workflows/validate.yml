@@ -11,8 +11,8 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# concurrency:
-#   group: ${{ github.ref }}
+concurrency:
+  group: ${{ github.ref }}
 
 jobs:
   validate:
@@ -30,8 +30,6 @@ jobs:
       - name: checkout self
         uses: actions/checkout@v3
 
-      - run: npm install
-
       - name: checkout test project
         uses: actions/checkout@v3
         with:
@@ -45,7 +43,6 @@ jobs:
       - name: activate unity license
         uses: ./
         with:
-          editor-path: ${{ env.editor-path }}
           username: ${{ secrets.UNITY_USERNAME }}
           license: ${{ secrets.UNITY_PERSONAL_LICENSE }}
           password: ${{ secrets.UNITY_PASSWORD }}

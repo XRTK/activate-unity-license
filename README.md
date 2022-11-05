@@ -29,7 +29,7 @@ This action requires several secrets that need to be setup in the repository or 
 
 * `UNITY_USERNAME`
 * `UNITY_PASSWORD`
-* `UNITY_SERIAL` (used for pro/plus activations)
+* `UNITY_SERIAL` (Required for pro/plus activations)
 
 ### Create Workflow file
 
@@ -60,9 +60,9 @@ jobs:
         uses: xrtk/activate-unity-license@v1
         with:
           # Required
-          editor-path: ${{ env.UNITY_EDITOR_PATH }} # Auto populated by xrtk/unity-setup@v1
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
-          serial: ${{ secrets.UNITY_SERIAL }} # Used for pro/plus activations
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
+          serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
 ```

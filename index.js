@@ -8,7 +8,6 @@ const { Activator } = require('@emoko/unity-activate');
 const main = async () => {
     try {
         var editorPath = process.env.UNITY_EDITOR_PATH;
-        //var editorPath = core.getInput('editor-path');
 
         if (!editorPath) {
             throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");

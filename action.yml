@@ -4,13 +4,6 @@ branding:
   icon: 'at-sign'
   color: 'blue'
 inputs:
-  editor-path:
-    description: 'Path to the Unity Editor'
-    required: true
-  license-type:
-    description: 'License type to activate (professional or personal)'
-    required: false
-    default: 'Personal'
   username:
     description: 'Unity Username'
     required: true
@@ -19,6 +12,10 @@ inputs:
     description: 'Unity Password'
     required: true
     default: ''
+  license-type:
+    description: 'License type to activate (professional or personal)'
+    required: false
+    default: 'Personal'
   license:
     description: '.ulf license file contents (Only used for Personal license type)'
     required: false
@@ -27,5 +24,5 @@ inputs:
     required: false
 runs:
   using: 'node16'
-  main: 'index.js'
+  main: 'dist/index.js'
   post: 'post.js'
