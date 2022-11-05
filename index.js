@@ -3,15 +3,15 @@ const exec = require('@actions/exec');
 const io = require('@actions/io');
 const path = require('path');
 const { readdir } = require('fs/promises');
-
 const { Activator } = require('@emoko/unity-activate');
 
 const main = async () => {
     try {
-        var editorPath = core.getInput('editor-path');
+        var editorPath = process.env.UNITY_EDITOR_PATH;
+        //var editorPath = core.getInput('editor-path');
 
         if (!editorPath) {
-            throw Error("Missing editor-path input");
+            throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
         }
 
         var username = core.getInput('username');
