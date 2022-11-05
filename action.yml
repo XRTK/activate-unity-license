@@ -19,9 +19,11 @@ inputs:
   license:
     description: '.ulf license file contents (Only used for Personal license type)'
     required: false
+    default: ''
   serial:
     description: 'Unity Serial (Only used for Professional license type)'
     required: false
+    default: ''
 runs:
   using: 'node16'
   main: 'dist/index.js'
