@@ -53,7 +53,8 @@ jobs:
           license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
 
-      - name: Unity Build (${{ matrix.build-target }})
-        uses: xrtk/unity-build@refactored-unity-action-test
+      - uses: xrtk/unity-action@refactor
+        name: Project Validation
         with:
-          build-target: ${{ matrix.build-target }}
+          log-name: 'project-validation'
+          args: '-quit -batchmode'
