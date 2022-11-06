@@ -31,19 +31,19 @@ jobs:
       - name: checkout self
         uses: actions/checkout@v3
 
+      - run: npm install
+
       - name: checkout test project
         uses: actions/checkout@v3
         with:
           repository: xrtk/com.xrtk.test
           path: test-project
 
-      - run: npm install
-
       - uses: xrtk/unity-setup@v3
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
-      - name: Activate Unity License
+      - name: xrtk/activate-unity-license
         uses: ./
         with:
           # Required
