@@ -56,7 +56,7 @@ const main = async () => {
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
             } catch (error) {
-                console.error(error.message);
+                //console.error(error.message);
             }
 
             var files = await findByExtension(__dirname, '.alf');
@@ -96,7 +96,7 @@ const main = async () => {
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
             } catch (error) {
-                console.error(error.message);
+                //console.error(error.message);
             }
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
