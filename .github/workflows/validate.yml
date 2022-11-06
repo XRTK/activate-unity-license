@@ -54,9 +54,7 @@ jobs:
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
 
       - name: Unity Build (${{ matrix.build-target }})
-        uses: xrtk/unity-build@refactored-unity-action-test
+        uses: xrtk/unity-action@refactor
         with:
-          build-target: ${{ matrix.build-target }}
-          additional-validate-args: '-nographics'
-          additional-test-args: '-nographics'
-          additional-build-args: '-nographics'
+          log-name: 'project-validation'
+          args: '-quit -nographics -batchmode -executeMethod XRTK.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject'
