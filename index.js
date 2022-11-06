@@ -31,17 +31,6 @@ const main = async () => {
             throw Error('Missing password input');
         }
 
-        var serial = core.getInput('serial');
-
-        if (!serial) {
-            throw Error('Missing serial input');
-        }
-
-        // Unity only likes to mask the last 4 characters of serial.
-        // Let's mask all of it.
-        var maskedSerial = serial.slice(0, -4) + `XXXX`;
-        console.log(`::add-mask::${maskedSerial}`);
-
         var licenseType = core.getInput('license-type');
 
         console.log(`Activating ${licenseType} Unity License`);
@@ -51,6 +40,17 @@ const main = async () => {
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
+
+            var serial = core.getInput('serial');
+
+            if (!serial) {
+                throw Error('Missing serial input');
+            }
+
+            // Unity only likes to mask the last 4 characters of serial.
+            // Let's mask all of it.
+            var maskedSerial = serial.slice(0, -4) + `XXXX`;
+            console.log(`::add-mask::${maskedSerial}`);
 
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
             var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
