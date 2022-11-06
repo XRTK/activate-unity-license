@@ -54008,7 +54008,7 @@ const main = async () => {
             }
 
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            args = `-quit -nographics -batchmode -manualLicenseFile "${ulfPath}"`;
+            args = `-quit -nographics -batchmode -manualLicenseFile \\"${ulfPath}\\"`;
 
             console.log(`::group::Activate Unity Personal License`);
 

@@ -79,11 +79,15 @@ try {
     do {
         try
         {
-            $file = Convert-Path $logPath
-            $fileStream = [System.IO.File]::Open($file,'Open','Write')
-            $fileStream.Close()
-            $fileStream.Dispose()
-            $fileLocked = $false
+            if (Test-Path -Path $logPath) {
+                $file = Convert-Path $logPath
+                $fileStream = [System.IO.File]::Open($file,'Open','Write')
+                $fileStream.Close()
+                $fileStream.Dispose()
+                $fileLocked = $false
+            } else {
+                $fileLocked = $false
+            }
         }
         catch
         {
