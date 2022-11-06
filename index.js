@@ -37,6 +37,11 @@ const main = async () => {
             throw Error('Missing serial input');
         }
 
+        // Unity only likes to mask the last 4 characters of serial.
+        // Let's mask all of it.
+        var maskedSerial = serial.slice(0, serial.length - 5) + `XXXX`;
+        console.log(`::add-mask::${maskedSerial}`);
+
         var licenseType = core.getInput('license-type');
 
         console.log(`Activating ${licenseType} Unity License`);
@@ -70,7 +75,7 @@ const main = async () => {
             var files = await findByExtension(__dirname, '.alf');
             var alfPath = files[0];
 
-            console.log(`alf Path: "${alfPath}"`);
+            console.debug(`alf Path: "${alfPath}"`);
 
             if (!alfPath) {
                 throw Error(`Failed to find generated license alf request file!`)
@@ -96,7 +101,7 @@ const main = async () => {
             files = await findByExtension(__dirname, '.ulf');
             var ulfPath = files[0];
 
-            console.log(`ulf file: "${ulfPath}"`);
+            console.debug(`ulf file: "${ulfPath}"`);
 
             if (!ulfPath) {
                 throw Error(`Failed to find manual license ulf file!`)
