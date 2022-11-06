@@ -49,7 +49,7 @@ const main = async () => {
 
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
             var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
-            console.log(`::group:: Activate Unity Professional License`);
+            console.log(`::group::Activate Unity Professional License`);
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             console.log(`::endgroup::`);
         } else if (licenseType.toLowerCase().startsWith('per')) {
@@ -57,7 +57,7 @@ const main = async () => {
             var args = `-quit -nographics -batchmode -createManualActivationFile` //-username ${username} -password ${password}
             var exitCode = 0;
 
-            console.log(`::group:: Generate License Request File`);
+            console.log(`::group::Generate Unity License Request File`);
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
@@ -76,7 +76,7 @@ const main = async () => {
                 throw Error(`Failed to find generated license alf request file!`)
             }
 
-            console.log(`::group:: Download License Activation File`);
+            console.log(`::group::Download Unity License Activation File`);
 
             await new Activator({
                 file : alfPath,
@@ -103,9 +103,9 @@ const main = async () => {
             }
 
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            args = `-quit -nographics -batchmode -manualLicenseFile \"${ulfPath}\"`;
+            args = `-quit -nographics -batchmode -manualLicenseFile "${ulfPath}"`;
 
-            console.log(`::group:: Activate License`);
+            console.log(`::group::Activate Unity Personal License`);
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);

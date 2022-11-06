@@ -64,7 +64,7 @@ try {
 
         if ( $null -eq (Get-Process -Id $processId -ErrorAction SilentlyContinue) )
         {
-            Write-Host "Unity process has ended unexpectedly..."
+            Write-Host "Unity process has ended unexpectedly!"
             break
         }
     }
@@ -105,6 +105,7 @@ try {
     } while ( $fileLocked )
 
     Write-Host "End of log stream"
+    Start-Sleep -Milliseconds 1
     Write-Host "Cleaning up jobs..."
 
     # Clean up job
