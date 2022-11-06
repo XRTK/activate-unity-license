@@ -39,7 +39,7 @@ jobs:
 
       - run: npm install
 
-      - uses: xrtk/unity-setup@main
+      - uses: xrtk/unity-setup@v2
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
@@ -58,3 +58,21 @@ jobs:
         with:
           log-name: 'project-validation'
           args: '-quit -nographics -batchmode -executeMethod XRTK.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject'
+
+      - uses: actions/upload-artifact@v3
+        name: Upload Artifacts
+        if: always()
+        with:
+          name: '${{ runner.os }}-${{ matrix.build-target }}-Artifacts'
+          path: '${{ env.UNITY_PROJECT_PATH }}/Builds'
+
+      - name: Clean Artifacts
+        if: always()
+        run: |
+          # Clean Artifacts
+          $artifacts = "${{ env.UNITY_PROJECT_PATH }}/Builds"
+
+          if (Test-Path -Path $artifacts) {
+            Remove-Item $artifacts -Force -Recurse
+          }
+        shell: pwsh
