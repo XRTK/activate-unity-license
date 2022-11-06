@@ -26,10 +26,16 @@ const main = async () => {
             var unity_action = path.resolve(__dirname, 'unity-action.ps1');
             // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
             var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
-            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ReturnLicense`);
+            var exitCode = 0;
+
+            try {
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ReturnLicense`);
+            } catch (error) {
+                //console.error(error.message);
+            }
 
             if (exitCode != 0) {
-                throw Error(`Failed to activate license! errorCode: ${exitCode}`);
+                throw Error(`Failed to deactivate license! errorCode: ${exitCode}`);
             }
         }
     } catch (error) {

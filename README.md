@@ -27,9 +27,11 @@ https://docs.github.com/en/actions/managing-workflow-runs/approving-workflow-run
 
 This action requires several secrets that need to be setup in the repository or organization's action secret store.
 
-* `UNITY_USERNAME`
-* `UNITY_PASSWORD`
+* `UNITY_USERNAME` The email address you use for your Unity Id
+* `UNITY_PASSWORD` The password you use for Unity Id access
 * `UNITY_SERIAL` (Required for pro/plus activations)
+
+> Don't forget that pro/plus licenses only support 2 active licenses at a time!
 
 ### Create Workflow file
 
@@ -54,7 +56,7 @@ jobs:
         # sets -> env.UNITY_EDITOR_PATH
         # sets -> env.UNITY_PROJECT_PATH
         # https://github.com/XRTK/unity-setup
-      - uses: xrtk/unity-setup@v1
+      - uses: xrtk/unity-setup@v3
 
       - name: activate unity license
         uses: xrtk/activate-unity-license@v1

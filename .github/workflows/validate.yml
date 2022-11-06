@@ -39,7 +39,7 @@ jobs:
 
       - run: npm install
 
-      - uses: xrtk/unity-setup@fix/mac-install
+      - uses: xrtk/unity-setup@v3
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
