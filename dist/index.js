@@ -53944,7 +53944,7 @@ const main = async () => {
 
         // Unity only likes to mask the last 4 characters of serial.
         // Let's mask all of it.
-        var maskedSerial = serial.slice(0, serial.length - 5) + `XXXX`;
+        var maskedSerial = serial.slice(0, -4) + `XXXX`;
         console.log(`::add-mask::${maskedSerial}`);
 
         var licenseType = core.getInput('license-type');
