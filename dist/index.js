@@ -53948,21 +53948,23 @@ const main = async () => {
 
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
             var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
+            console.log(`::group:: Activate Unity Professional License`);
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ProLicenseActivation`);
-
-            if (exitCode != 0) {
-                throw Error(`Failed to activate license! errorCode: ${exitCode}`);
-            }
+            console.log(`::endgroup::`);
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
             var args = `-quit -nographics -batchmode -createManualActivationFile` //-username ${username} -password ${password}
             var exitCode = 0;
 
+            console.log(`::group:: Generate License Request File`);
+
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
             } catch (error) {
-                console.error(error.message);
+                //console.error(error.message);
             }
+
+            console.log(`::endgroup::`);
 
             var files = await findByExtension(__dirname, '.alf');
             var alfPath = files[0];
@@ -53972,6 +53974,8 @@ const main = async () => {
             if (!alfPath) {
                 throw Error(`Failed to find generated license alf request file!`)
             }
+
+            console.log(`::group:: Download License Activation File`);
 
             await new Activator({
                 file : alfPath,
@@ -53986,6 +53990,8 @@ const main = async () => {
                 throw Error(e.message);
             });
 
+            console.log(`::endgroup::`);
+
             files = await findByExtension(__dirname, '.ulf');
             var ulfPath = files[0];
 
@@ -53998,11 +54004,15 @@ const main = async () => {
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
             args = `-quit -nographics -batchmode -manualLicenseFile \"${ulfPath}\"`;
 
+            console.log(`::group:: Activate License`);
+
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
             } catch (error) {
-                console.error(error.message);
+                //console.error(error.message);
             }
+
+            console.log(`::endgroup::`);
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
         }
@@ -54026,6 +54036,7 @@ const findByExtension = async (dir, ext) => {
 
     return matchedFiles;
 };
+
 })();
 
 module.exports = __webpack_exports__;
