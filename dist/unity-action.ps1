@@ -64,12 +64,9 @@ try {
 
         if ( $null -eq (Get-Process -Id $processId -ErrorAction SilentlyContinue) )
         {
-            Write-Host "Unity process has ended unexpectedly!"
             break
         }
     }
-
-    Write-Host "Unity Process $processId Complete!"
 
     # Wait for the last of the log information to be written
     $fileLocked = $true
@@ -97,7 +94,6 @@ try {
         if ( $stopwatch.elapsed -lt $timeout )
         {
             if ( (-not $global:PSVersionTable.Platform) -or ($global:PSVersionTable.Platform -eq "Win32NT") ) {
-                Write-Host "Attempting to cleanup orphaned processes..."
                 $procsWithParent = Get-CimInstance -ClassName "win32_process" | Select-Object ProcessId,ParentProcessId
                 $orphaned = $procsWithParent | Where-Object -Property ParentProcessId -NotIn $procsWithParent.ProcessId
                 $procs = Get-Process -IncludeUserName | Where-Object -Property Id -In $orphaned.ProcessId | Where-Object { $_.UserName -match $env:username }
@@ -108,9 +104,7 @@ try {
         Start-Sleep -Milliseconds 1
     } while ( $fileLocked )
 
-    Write-Host "End of log stream"
     Start-Sleep -Milliseconds 1
-    Write-Host "Cleaning up jobs..."
 
     # Clean up job
     Receive-Job $ljob
