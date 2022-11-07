@@ -140,7 +140,8 @@ const findByExtension = async (dir, ext) => {
         const item = path.resolve(dir, file);
 
         if (fs.statSync(`${dir}/${file}`).isDirectory()) {
-            matchedFiles.push(findByExtension(item, ext));
+            var nestedMatches = await findByExtension(item, ext);
+            matchedFiles.push(nestedMatches);
         } else if (file.endsWith(ext)) {
             matchedFiles.push(item);
         }
