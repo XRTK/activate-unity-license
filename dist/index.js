@@ -132,14 +132,17 @@ async function Run() {
 };
 
 const findByExtension = async (dir, ext) => {
+    console.log(`Searching ${dir} for files ending in ${ext}`);
     const matchedFiles = [];
     const files = await readdir(dir);
 
     for (const file of files) {
+        const item = path.resolve(dir, file);
+
         if (fs.statSync(`${dir}/${file}`).isDirectory()) {
-            matchedFiles.push(findByExtension(path.resolve(dir, file), ext));
+            matchedFiles.push(findByExtension(item, ext));
         } else if (file.endsWith(ext)) {
-            matchedFiles.push(path.resolve(dir, file));
+            matchedFiles.push(item);
         }
     }
 
