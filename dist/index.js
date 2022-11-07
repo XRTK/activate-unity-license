@@ -160,10 +160,10 @@ const path = __nccwpck_require__(1017);
 async function Run() {
     try {
         var licenseType = core.getInput('license-type');
+        console.log(`Returning ${licenseType} Unity License`);
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // return license if pro/plus
-            console.log(`Returning ${licenseType} Unity License`);
 
             var username = core.getInput('username');
 
@@ -178,7 +178,7 @@ async function Run() {
             }
 
             var pwsh = await io.which("pwsh", true);
-            var unity_action = path.resolve(__dirname, 'unity-action.ps1');
+            var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
             // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
             var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
             var exitCode = 0;
@@ -197,7 +197,6 @@ async function Run() {
         core.setFailed(error.message);
     }
 };
-
 
 module.exports = { Run }
 
@@ -54112,6 +54111,8 @@ const deactivate = __nccwpck_require__(279);
 const IsPost = !!core.getState('isPost');
 
 const main = async () => {
+    console.log(`IsPost: ${IsPost}`);
+
     if (!IsPost) {
         // activate license
         await activate.Run();
