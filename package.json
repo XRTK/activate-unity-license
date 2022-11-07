@@ -2,7 +2,7 @@
   "name": "activate-unity-license",
   "version": "1.0.0",
   "description": "An atomic GitHub Action that activates the Unity Engine license via cli with the provided secret parameters.",
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
@@ -10,9 +10,12 @@
     "@actions/io": "^1.1.2",
     "@emoko/unity-activate": "^1.3.11"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@vercel/ncc": "^0.34.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build src/index.js -o dist --license licenses.txt"
   },
   "repository": {
     "type": "git",

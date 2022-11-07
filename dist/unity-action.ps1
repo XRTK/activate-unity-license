@@ -14,15 +14,12 @@ try {
         $buildArgs += "-buildTarget `"$buildTarget`" "
     }
 
-    $exPath = (Resolve-Path .\).Path
-    Write-Host $exPath
-
     if (-not [String]::IsNullOrEmpty($projectPath)) {
         if (($additionalArgs -match "-createManualActivationFile") -or
             ($additionalArgs -match "-manualLicenseFile") -or
             ($additionalArgs -match "-returnlicense") -or
             ($additionalArgs -match "-serial")) {
-                Write-Host "License activation, no project path set"
+            Write-Host "License activation, no project path will be set"
         } else {
             $buildArgs += "-projectPath `"$projectPath`" "
             Write-Host "Project Path added to args $projectPath"
