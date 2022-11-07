@@ -22,7 +22,7 @@ async function Run() {
         var projectPath = process.env.UNITY_PROJECT_PATH;
 
         if (!projectPath) {
-            projectPath = __dirname;
+            throw Error("Missing UNITY_PROJECT_PATH! Requires xrtk/unity-setup to run before this step.");
         }
 
         var username = core.getInput('username');
@@ -42,7 +42,7 @@ async function Run() {
         console.log(`Activating ${licenseType} Unity License`);
 
         var pwsh = await io.which("pwsh", true);
-        var unity_action = path.resolve(__dirname, 'unity-action.ps1');
+        var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
