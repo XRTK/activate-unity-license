@@ -1,6 +1,217 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 5771:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "Main": () => (/* binding */ Main)
+/* harmony export */ });
+const core = __nccwpck_require__(4191);
+const exec = __nccwpck_require__(6284);
+const io = __nccwpck_require__(156);
+const path = __nccwpck_require__(1017);
+const { readdir } = __nccwpck_require__(3292);
+const { Activator } = __nccwpck_require__(8032);
+
+async function Main() {
+    try {
+        var editorPath = process.env.UNITY_EDITOR_PATH;
+
+        if (!editorPath) {
+            throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
+        }
+
+        var projectPath = process.env.UNITY_PROJECT_PATH;
+
+        if (!projectPath) {
+            projectPath = __dirname;
+        }
+
+        var username = core.getInput('username');
+
+        if (!username) {
+            throw Error('Missing username input');
+        }
+
+        var password = core.getInput('password');
+
+        if (!password) {
+            throw Error('Missing password input');
+        }
+
+        var licenseType = core.getInput('license-type');
+
+        console.log(`Activating ${licenseType} Unity License`);
+
+        var pwsh = await io.which("pwsh", true);
+        var unity_action = path.resolve(__dirname, 'unity-action.ps1');
+
+        if (licenseType.toLowerCase().startsWith('pro')) {
+            // if pro/plus license activate by using UNITY_SERIAL env variable
+            var serial = core.getInput('serial');
+
+            if (!serial) {
+                throw Error('Missing serial input');
+            }
+
+            // Unity only likes to mask the last 4 characters of serial.
+            // Let's mask all of it.
+            var maskedSerial = serial.slice(0, -4) + `XXXX`;
+            console.log(`::add-mask::${maskedSerial}`);
+
+            // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
+            var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
+            console.log(`::group::Activate Unity Professional License`);
+            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
+            console.log(`::endgroup::`);
+        } else if (licenseType.toLowerCase().startsWith('per')) {
+            // if personal license activate by using requesting activation file
+            var args = `-quit -nographics -batchmode -createManualActivationFile`; //-username ${username} -password ${password}
+            var exitCode = 0;
+
+            console.log(`::group::Generate Unity License Request File`);
+
+            try {
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
+            } catch (error) {
+                //console.error(error.message);
+            }
+
+            console.log(`::endgroup::`);
+
+            var files = await findByExtension(__dirname, '.alf');
+            var alfPath = files[0];
+
+            console.debug(`alf Path: "${alfPath}"`);
+
+            if (!alfPath) {
+                throw Error(`Failed to find generated license alf request file!`);
+            }
+
+            console.log(`::group::Download Unity License Activation File`);
+
+            await new Activator({
+                file: alfPath,
+                username: username,
+                password: password,
+                key: '',
+                serial: '',
+                out: __dirname,
+            })
+                .run()
+                .catch(e => {
+                    throw Error(e.message);
+                });
+
+            console.log(`::endgroup::`);
+
+            files = await findByExtension(__dirname, '.ulf');
+            var ulfPath = files[0];
+
+            console.debug(`ulf file: "${ulfPath}"`);
+
+            if (!ulfPath) {
+                throw Error(`Failed to find manual license ulf file!`);
+            }
+
+            // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
+            args = `-quit -nographics -batchmode -manualLicenseFile ""${ulfPath}""`;
+
+            console.log(`::group::Activate Unity Personal License`);
+
+            try {
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
+            } catch (error) {
+                //console.error(error.message);
+            }
+
+            console.log(`::endgroup::`);
+        } else {
+            core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`);
+        }
+    } catch (error) {
+        core.setFailed(`Unity License Activation Failed! ${error.message}`);
+    }
+}
+
+const findByExtension = async (dir, ext) => {
+    const matchedFiles = [];
+    const files = await readdir(dir);
+
+    for (const file of files) {
+        if (file.endsWith(ext)) {
+            matchedFiles.push(path.resolve(dir, file));
+        }
+    }
+
+    return matchedFiles;
+};
+
+
+/***/ }),
+
+/***/ 621:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "Post": () => (/* binding */ Post),
+/* harmony export */   "IsPost": () => (/* binding */ IsPost)
+/* harmony export */ });
+const core = __nccwpck_require__(4191);
+const exec = __nccwpck_require__(6284);
+const io = __nccwpck_require__(156);
+const path = __nccwpck_require__(1017);
+
+async function Post() {
+    try {
+        var licenseType = core.getInput('license-type');
+
+        if (licenseType.toLowerCase().startsWith('pro')) {
+            // return license if pro/plus
+            console.log(`Returning ${licenseType} Unity License`);
+
+            var username = core.getInput('username');
+
+            if (!username) {
+                throw Error('Missing username input');
+            }
+
+            var password = core.getInput('password');
+
+            if (!password) {
+                throw Error('Missing password input');
+            }
+
+            var pwsh = await io.which("pwsh", true);
+            var unity_action = path.resolve(__dirname, 'unity-action.ps1');
+            // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
+            var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
+            var exitCode = 0;
+
+            try {
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ReturnLicense`);
+            } catch (error) {
+                //console.error(error.message);
+            }
+
+            if (exitCode != 0) {
+                throw Error(`Failed to deactivate license! errorCode: ${exitCode}`);
+            }
+        }
+    } catch (error) {
+        core.setFailed(error.message);
+    }
+}
+
+const IsPost = !!core.getState('isPost');
+
+/***/ }),
+
 /***/ 7558:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -53895,6 +54106,34 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
@@ -53903,150 +54142,14 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const core = __nccwpck_require__(4191);
-const exec = __nccwpck_require__(6284);
-const io = __nccwpck_require__(156);
-const path = __nccwpck_require__(1017);
-const { readdir } = __nccwpck_require__(3292);
-const { Activator } = __nccwpck_require__(8032);
+const main = __nccwpck_require__(5771);
+const post = __nccwpck_require__(621);
 
-const main = async () => {
-    try {
-        var editorPath = process.env.UNITY_EDITOR_PATH;
-
-        if (!editorPath) {
-            throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
-        }
-
-        var projectPath = process.env.UNITY_PROJECT_PATH;
-
-        if (!projectPath) {
-            projectPath = __dirname;
-        }
-
-        var username = core.getInput('username');
-
-        if (!username) {
-            throw Error('Missing username input');
-        }
-
-        var password = core.getInput('password');
-
-        if (!password) {
-            throw Error('Missing password input');
-        }
-
-        var licenseType = core.getInput('license-type');
-
-        console.log(`Activating ${licenseType} Unity License`);
-
-        var pwsh = await io.which("pwsh", true);
-        var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
-
-        if (licenseType.toLowerCase().startsWith('pro')) {
-            // if pro/plus license activate by using UNITY_SERIAL env variable
-
-            var serial = core.getInput('serial');
-
-            if (!serial) {
-                throw Error('Missing serial input');
-            }
-
-            // Unity only likes to mask the last 4 characters of serial.
-            // Let's mask all of it.
-            var maskedSerial = serial.slice(0, -4) + `XXXX`;
-            console.log(`::add-mask::${maskedSerial}`);
-
-            // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
-            var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
-            console.log(`::group::Activate Unity Professional License`);
-            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
-            console.log(`::endgroup::`);
-        } else if (licenseType.toLowerCase().startsWith('per')) {
-            // if personal license activate by using requesting activation file
-            var args = `-quit -nographics -batchmode -createManualActivationFile` //-username ${username} -password ${password}
-            var exitCode = 0;
-
-            console.log(`::group::Generate Unity License Request File`);
-
-            try {
-                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
-            } catch (error) {
-                //console.error(error.message);
-            }
-
-            console.log(`::endgroup::`);
-
-            var files = await findByExtension(__dirname, '.alf');
-            var alfPath = files[0];
-
-            console.debug(`alf Path: "${alfPath}"`);
-
-            if (!alfPath) {
-                throw Error(`Failed to find generated license alf request file!`)
-            }
-
-            console.log(`::group::Download Unity License Activation File`);
-
-            await new Activator({
-                file : alfPath,
-                username : username,
-                password : password,
-                key : '', // use of 2FA isn't recommended for automated workflows
-                serial : '', // intentionally left blank for personal license
-                out : __dirname,
-            })
-            .run()
-            .catch(e => {
-                throw Error(e.message);
-            });
-
-            console.log(`::endgroup::`);
-
-            files = await findByExtension(__dirname, '.ulf');
-            var ulfPath = files[0];
-
-            console.debug(`ulf file: "${ulfPath}"`);
-
-            if (!ulfPath) {
-                throw Error(`Failed to find manual license ulf file!`)
-            }
-
-            // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            args = `-quit -nographics -batchmode -manualLicenseFile ""${ulfPath}""`;
-
-            console.log(`::group::Activate Unity Personal License`);
-
-            try {
-                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
-            } catch (error) {
-                //console.error(error.message);
-            }
-
-            console.log(`::endgroup::`);
-        } else {
-            core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`)
-        }
-    } catch (error) {
-        core.setFailed(`Unity License Activation Failed! ${error.message}`);
-    }
+if (!post.IsPost) {
+    main.Main();
+} else {
+    post.Post();
 }
-
-// Call the main function to run the action
-main();
-
-const findByExtension = async (dir, ext) => {
-    const matchedFiles = [];
-    const files = await readdir(dir);
-
-    for (const file of files) {
-        if (file.endsWith(ext)) {
-            matchedFiles.push(path.resolve(dir, file));
-        }
-    }
-
-    return matchedFiles;
-};
 
 })();
 

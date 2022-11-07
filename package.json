@@ -2,7 +2,7 @@
   "name": "activate-unity-license",
   "version": "1.0.0",
   "description": "An atomic GitHub Action that activates the Unity Engine license via cli with the provided secret parameters.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
