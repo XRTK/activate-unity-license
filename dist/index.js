@@ -62,7 +62,6 @@ async function Run() {
             console.log(`::group::Activate Unity Professional License`);
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             console.log(`::endgroup::`);
-            core.saveState('returnLicense', true);
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
             var args = `-quit -nographics -batchmode -createManualActivationFile`; //-username ${username} -password ${password}
@@ -54104,10 +54103,12 @@ const core = __nccwpck_require__(4191);
 const activate = __nccwpck_require__(2281);
 const deactivate = __nccwpck_require__(279);
 
-const ReturnLicense = !!core.getState('returnLicense');
+const IsPost = !!core.getState('isPost');
 
 const main = async () => {
-    if (!ReturnLicense) {
+    core.saveState('isPost', true);
+
+    if (!IsPost) {
         // activate license
         await activate.Run();
     } else {

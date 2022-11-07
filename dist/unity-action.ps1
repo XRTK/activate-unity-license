@@ -18,10 +18,10 @@ try {
     Write-Host $exPath
 
     if (-not [String]::IsNullOrEmpty($projectPath)) {
-        if (($additionalArgs -like "*createManualActivationFile") -or
-            ($additionalArgs -like "*manualLicenseFile") -or
-            ($additionalArgs -like "*returnlicense") -or
-            ($additionalArgs -like "*serial")) {
+        if (($additionalArgs -match "-createManualActivationFile") -or
+            ($additionalArgs -match "-manualLicenseFile") -or
+            ($additionalArgs -match "-returnlicense") -or
+            ($additionalArgs -match "-serial")) {
                 Write-Host "License activation, no project path set"
         } else {
             $buildArgs += "-projectPath `"$projectPath`" "
