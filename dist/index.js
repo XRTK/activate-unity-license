@@ -54115,6 +54115,7 @@ const main = async () => {
 
     if (!IsPost) {
         // activate license
+        core.saveState('isPost', true);
         await activate.Run();
     } else {
         // return license
