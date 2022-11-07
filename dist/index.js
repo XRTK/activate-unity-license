@@ -53792,7 +53792,7 @@ const getPackageDirectory = (from) => {
     const root = (0, path_1.parse)(from).root;
     while (!found) {
         if (from === root) {
-            throw new Error(`Cannot find package directory ${from}`);
+            throw new Error('Cannot find package directory ' + from);
         }
         from = (0, path_1.dirname)(from);
         found = (0, fs_1.existsSync)((0, path_1.join)(from, 'package.json'));
