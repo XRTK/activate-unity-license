@@ -40,6 +40,7 @@ jobs:
   validate:
     runs-on: ${{ matrix.os }}
     strategy:
+      #max-parallel: 2 # Use this if you're activating pro license with matrix
       matrix:
         include:
           - os: ubuntu-latest
