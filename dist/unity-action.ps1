@@ -14,6 +14,9 @@ try {
         $buildArgs += "-buildTarget `"$buildTarget`" "
     }
 
+    $exPath = (Resolve-Path .\).Path
+    Write-Host $exPath
+
     if (-not [String]::IsNullOrEmpty($projectPath)) {
         $buildArgs += "-projectPath `"$projectPath`" "
 
