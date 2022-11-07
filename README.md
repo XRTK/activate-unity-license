@@ -37,7 +37,7 @@ This action requires several secrets that need to be setup in the repository or 
 
 ```yml
 jobs:
-  validate:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       #max-parallel: 2 # Use this if you're activating pro license with matrix
@@ -49,6 +49,7 @@ jobs:
             build-target: StandaloneWindows64
           - os: macos-latest
             build-target: StandaloneOSX
+
     steps:
       - name: checkout self
         uses: actions/checkout@v3
@@ -57,10 +58,10 @@ jobs:
         # sets -> env.UNITY_EDITOR_PATH
         # sets -> env.UNITY_PROJECT_PATH
         # https://github.com/XRTK/unity-setup
-      - uses: xrtk/unity-setup@v3
+      - uses: xrtk/unity-setup@v4
 
-      - name: activate unity license
-        uses: xrtk/activate-unity-license@v1
+        # Activates the installation with the provided credentials
+      - uses: xrtk/activate-unity-license@v1
         with:
           # Required
           username: ${{ secrets.UNITY_USERNAME }}
