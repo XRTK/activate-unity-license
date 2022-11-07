@@ -7,6 +7,7 @@
 const core = __nccwpck_require__(4191);
 const exec = __nccwpck_require__(6284);
 const io = __nccwpck_require__(156);
+const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const { readdir } = __nccwpck_require__(3292);
 const { Activator } = __nccwpck_require__(8032);
@@ -135,7 +136,9 @@ const findByExtension = async (dir, ext) => {
     const files = await readdir(dir);
 
     for (const file of files) {
-        if (file.endsWith(ext)) {
+        if (fs.statSync(`${dir}/${file}`).isDirectory()) {
+            matchedFiles.push(findByExtension(path.resolve(dir, file), ext));
+        } else if (file.endsWith(ext)) {
             matchedFiles.push(path.resolve(dir, file));
         }
     }
