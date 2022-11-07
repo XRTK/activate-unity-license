@@ -1,13 +1,13 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 5771:
+/***/ 2281:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
 __nccwpck_require__.r(__webpack_exports__);
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "Main": () => (/* binding */ Main)
+/* harmony export */   "Run": () => (/* binding */ Run)
 /* harmony export */ });
 const core = __nccwpck_require__(4191);
 const exec = __nccwpck_require__(6284);
@@ -16,7 +16,7 @@ const path = __nccwpck_require__(1017);
 const { readdir } = __nccwpck_require__(3292);
 const { Activator } = __nccwpck_require__(8032);
 
-async function Main() {
+async function Run() {
     try {
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
@@ -135,7 +135,7 @@ async function Main() {
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
     }
-}
+};
 
 const findByExtension = async (dir, ext) => {
     const matchedFiles = [];
@@ -153,13 +153,13 @@ const findByExtension = async (dir, ext) => {
 
 /***/ }),
 
-/***/ 621:
+/***/ 279:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
 __nccwpck_require__.r(__webpack_exports__);
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "Post": () => (/* binding */ Post),
+/* harmony export */   "Run": () => (/* binding */ Run),
 /* harmony export */   "IsPost": () => (/* binding */ IsPost)
 /* harmony export */ });
 const core = __nccwpck_require__(4191);
@@ -167,7 +167,7 @@ const exec = __nccwpck_require__(6284);
 const io = __nccwpck_require__(156);
 const path = __nccwpck_require__(1017);
 
-async function Post() {
+async function Run() {
     try {
         var licenseType = core.getInput('license-type');
 
@@ -206,7 +206,7 @@ async function Post() {
     } catch (error) {
         core.setFailed(error.message);
     }
-}
+};
 
 const IsPost = !!core.getState('isPost');
 
@@ -54142,15 +54142,21 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const main = __nccwpck_require__(5771);
-const post = __nccwpck_require__(621);
+const activate = __nccwpck_require__(2281);
+const deactivate = __nccwpck_require__(279);
 
-if (!post.IsPost) {
-    main.Main();
-} else {
-    post.Post();
+const main = async () => {
+    if (!post.IsPost) {
+        // activate license
+        await activate.Run();
+    } else {
+        // return license
+        await deactivate.Run();
+    }
 }
 
+// Call the main function to run the action
+main();
 })();
 
 module.exports = __webpack_exports__;
