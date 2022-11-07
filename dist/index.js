@@ -39,8 +39,6 @@ async function Run() {
 
         var licenseType = core.getInput('license-type');
 
-        console.log(`Activating ${licenseType} Unity License`);
-
         var pwsh = await io.which("pwsh", true);
         var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
 
@@ -165,6 +163,18 @@ async function Run() {
             // return license if pro/plus
             console.log(`::group::Returning ${licenseType} Unity License`);
 
+            var editorPath = process.env.UNITY_EDITOR_PATH;
+
+            if (!editorPath) {
+                throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
+            }
+
+            var projectPath = process.env.UNITY_PROJECT_PATH;
+
+            if (!projectPath) {
+                throw Error("Missing UNITY_PROJECT_PATH! Requires xrtk/unity-setup to run before this step.");
+            }
+
             var username = core.getInput('username');
 
             if (!username) {
@@ -181,7 +191,14 @@ async function Run() {
             var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
             // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
             var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
-            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ReturnLicense`);
+            var exitCode = 0;
+
+            try {
+                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ReturnLicense`);
+            } catch (error) {
+                console.error(error.message);
+            }
+
             console.log(`::endgroup::`);
 
             if (exitCode != 0) {
