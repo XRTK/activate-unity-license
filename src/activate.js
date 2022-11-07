@@ -4,7 +4,7 @@ const io = require('@actions/io');
 const fs = require("fs");
 const path = require('path');
 const { readdir } = require('fs/promises');
-const { Activator } = require('@emoko/unity-activate');
+const { Activator } = require('./unity-activator/activator');
 
 async function Run() {
     try {
@@ -89,10 +89,10 @@ async function Run() {
                 serial: '',
                 out: __dirname,
             })
-                .run()
-                .catch(e => {
-                    throw Error(e.message);
-                });
+            .run()
+            .catch(e => {
+                throw Error(e.message);
+            });
 
             console.log(`::endgroup::`);
 
