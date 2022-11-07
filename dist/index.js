@@ -62,6 +62,7 @@ async function Run() {
             console.log(`::group::Activate Unity Professional License`);
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             console.log(`::endgroup::`);
+            core.saveState('returnLicense', true);
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
             var args = `-quit -nographics -batchmode -createManualActivationFile`; //-username ${username} -password ${password}
@@ -181,14 +182,7 @@ async function Run() {
             var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
             // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
             var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
-            var exitCode = 0;
-
-            try {
-                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ReturnLicense`);
-            } catch (error) {
-                //console.error(error.message);
-            }
-
+            var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${__dirname}" -additionalArgs "${args}" -logName ReturnLicense`);
             console.log(`::endgroup::`);
 
             if (exitCode != 0) {
@@ -54110,12 +54104,11 @@ const core = __nccwpck_require__(4191);
 const activate = __nccwpck_require__(2281);
 const deactivate = __nccwpck_require__(279);
 
-const IsPost = !!core.getState('isPost');
+const ReturnLicense = !!core.getState('returnLicense');
 
 const main = async () => {
-    if (!IsPost) {
+    if (!ReturnLicense) {
         // activate license
-        core.saveState('isPost', true);
         await activate.Run();
     } else {
         // return license
