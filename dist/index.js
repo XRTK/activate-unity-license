@@ -1,4 +1,4 @@
-/******/ (() => { // webpackBootstrap
+require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 7351:
@@ -53792,7 +53792,7 @@ const getPackageDirectory = (from) => {
     const root = (0, path_1.parse)(from).root;
     while (!found) {
         if (from === root) {
-            throw new Error('Cannot find package directory ' + from);
+            throw new Error('Cannot find package directory');
         }
         from = (0, path_1.dirname)(from);
         found = (0, fs_1.existsSync)((0, path_1.join)(from, 'package.json'));
@@ -54151,3 +54151,4 @@ main();
 module.exports = __webpack_exports__;
 /******/ })()
 ;
+//# sourceMappingURL=index.js.map
