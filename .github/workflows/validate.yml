@@ -40,7 +40,7 @@ jobs:
           repository: xrtk/com.xrtk.test
           path: test-project
 
-      - uses: xrtk/unity-setup@development
+      - uses: xrtk/unity-setup@v4
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
