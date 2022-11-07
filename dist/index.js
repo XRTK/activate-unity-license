@@ -160,10 +160,10 @@ const path = __nccwpck_require__(1017);
 async function Run() {
     try {
         var licenseType = core.getInput('license-type');
-        console.log(`Returning ${licenseType} Unity License`);
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // return license if pro/plus
+            console.log(`Returning ${licenseType} Unity License`);
 
             var username = core.getInput('username');
 
@@ -54111,8 +54111,6 @@ const deactivate = __nccwpck_require__(279);
 const IsPost = !!core.getState('isPost');
 
 const main = async () => {
-    console.log(`IsPost: ${IsPost}`);
-
     if (!IsPost) {
         // activate license
         core.saveState('isPost', true);
