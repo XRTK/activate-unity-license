@@ -22,5 +22,5 @@ inputs:
     default: ''
 runs:
   using: 'node16'
-  main: 'src/index.js'
-  post: 'src/index.js'
+  main: 'dist/index.js'
+  post: 'dist/index.js'
