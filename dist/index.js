@@ -163,7 +163,7 @@ async function Run() {
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // return license if pro/plus
-            console.log(`Returning ${licenseType} Unity License`);
+            console.log(`::group::Returning ${licenseType} Unity License`);
 
             var username = core.getInput('username');
 
@@ -188,6 +188,8 @@ async function Run() {
             } catch (error) {
                 //console.error(error.message);
             }
+
+            console.log(`::endgroup::`);
 
             if (exitCode != 0) {
                 throw Error(`Failed to deactivate license! errorCode: ${exitCode}`);
