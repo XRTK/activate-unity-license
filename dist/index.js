@@ -75,7 +75,7 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            var files = await findByExtension(path.resolve('..', projectPath), '.alf');
+            var files = await findByExtension(path.resolve(projectPath, '..'), '.alf');
             var alfPath = files[0];
 
             console.debug(`alf Path: "${alfPath}"`);
