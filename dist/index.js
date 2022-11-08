@@ -37539,6 +37539,9 @@ const { Activator } = __nccwpck_require__(3702);
 
 async function Run() {
     try {
+        console.log(`Current working dir: ${process.cwd()}`);
+        console.log(`Current   __dirname: ${__dirname}`);
+
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {
@@ -37601,7 +37604,7 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            var exeDir = path.resolve(__dirname, '..', '..');
+            var exeDir = path.resolve(process.cwd());
             console.debug(`exeDir: ${exeDir}`);
             var files = await findByExtension(exeDir, '.alf');
             var alfPath = files[0];
