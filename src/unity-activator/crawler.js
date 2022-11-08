@@ -56,10 +56,12 @@ class Crawler {
         //this.tmpDir = path.join(os.tmpdir(), Math.random().toString(32).substring(2));
         this.tmpDir = path.join(".", Math.random().toString(32).substring(2));
         fs.mkdirSync(this.tmpDir);
+        const _tempDir = path.resolve(this.tmpDir);
+        logger.debug(`temDir ${_tempDir}`);
         const client = await this.page.target().createCDPSession();
         await client.send('Page.setDownloadBehavior', {
             behavior: 'allow',
-            downloadPath: path.resolve(this.tmpDir),
+            downloadPath: _tempDir,
         });
         try {
             logger.debug(`Start crawl`);
@@ -141,7 +143,7 @@ class Crawler {
     async waitAndClick(selector) {
         logger.debug(`waitAndClick: ${selector}`);
         await this.page.waitForSelector(selector, { timeout: 5000 });
-        await this.page.evaluate(s => {
+        await this.page.evaluate((s) => {
             const element = document.querySelector(s);
             if (element !== null)
                 element.click();
@@ -156,11 +158,13 @@ class Crawler {
             elapsed += 100;
             downloadFile = fs.readdirSync(this.tmpDir)[0];
         } while (elapsed < timeout && (!downloadFile || downloadFile.endsWith('.crdownload')));
-        if (!downloadFile)
+        if (!downloadFile) {
             return undefined;
+        }
         // create download dir
-        if (!fs.existsSync(this.downloadDir) || !fs.statSync(this.downloadDir).isDirectory())
+        if (!fs.existsSync(this.downloadDir) || !fs.statSync(this.downloadDir).isDirectory()) {
             fs.mkdirSync(this.downloadDir, { recursive: true });
+        }
         // move to download path
         const downloadPath = path.resolve(this.downloadDir, downloadFile);
         fs.copyFileSync(path.resolve(this.tmpDir, downloadFile), downloadPath);
