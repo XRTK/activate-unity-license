@@ -70,18 +70,17 @@ class Activator extends crawler_1.Crawler {
                 throw new Error('Verify code is invalid');
         }
         // Step: close update dialog
-        await this.waitForTimeout(2000);
         console.log("  > close update dialog");
         if (await this.exists('#new_conversations_accept_updated_tos_form button.novalidation.accept')) {
             await this.waitAndClick('#new_conversations_accept_updated_tos_form button.novalidation.accept');
-            await this.waitForTimeout(500);
         }
         // Step: upload alf file.
         console.log("  > upload alf file");
         const licenseFile = await this.waitForSelector('input[name="licenseFile"]');
         if (licenseFile === null)
             throw new Error(`'input[name="licenseFile"]' is not found`);
-        await licenseFile.uploadFile(this.options.file);
+        const licenseElement = licenseFile;
+        await licenseElement.uploadFile(this.options.file);
         await this.click('input[name="commit"]');
         // [[ CHECK ]] Not valid for Unity activation license file
         if (!await this.exists('input[id="type_personal"][value="personal"]'))

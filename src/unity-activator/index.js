@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const activator_1 = require("./activator");
-const cac_1 = __importDefault(require("cac"));
+const cac_1 = require("cac");
 const get_package_version_1 = __importDefault(require("@jsbits/get-package-version"));
-const cli = cac_1.default();
+const cli = new cac_1.CAC();
 cli.command('[opts] <file>', 'Activate Unity activation license file (*.alf).\nNOTE: If two-factor authentication is enabled, the verify code will be requested.')
     .option('-o, --out <dir>', 'Output ulf file to the specified directory', { default: '.' })
     .option('-u, --username <username>', 'Username (email) to login Unity (default: $UNITY_USERNAME)')
@@ -36,7 +36,7 @@ cli.command('[opts] <file>', 'Activate Unity activation license file (*.alf).\nN
     });
 })());
 cli.help()
-    .version(get_package_version_1.default());
+    .version((0, get_package_version_1.default)());
 try {
     cli.parse();
 }

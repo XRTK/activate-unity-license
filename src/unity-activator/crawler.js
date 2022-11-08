@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -27,7 +31,7 @@ const puppeteer_1 = __importDefault(require("puppeteer"));
 const log4js_1 = require("log4js");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
-const logger = log4js_1.getLogger();
+const logger = (0, log4js_1.getLogger)();
 class Crawler {
     constructor(debug, headless, downloadDir) {
         this.headless = false;
@@ -55,7 +59,7 @@ class Crawler {
         const client = await this.page.target().createCDPSession();
         await client.send('Page.setDownloadBehavior', {
             behavior: 'allow',
-            downloadPath: this.tmpDir,
+            downloadPath: path.resolve(this.tmpDir),
         });
         try {
             logger.debug(`Start crawl`);
@@ -132,18 +136,19 @@ class Crawler {
     }
     async waitForSelector(selector) {
         logger.debug(`waitForSelector: ${selector}`);
-        await this.page.waitForTimeout(1000);
         return await this.page.waitForSelector(selector, { timeout: 2000 });
     }
     async waitAndClick(selector) {
         logger.debug(`waitAndClick: ${selector}`);
-        await this.page.waitForTimeout(1000);
         await this.page.waitForSelector(selector, { timeout: 2000 });
-        await this.page.evaluate(s => document.querySelector(s).click(), selector);
+        await this.page.evaluate(s => {
+            const element = document.querySelector(s);
+            if (element !== null)
+                element.click();
+        }, selector);
     }
     async waitForDownload(timeout = 5000) {
         logger.debug(`waitForDownload: timeout=${timeout}`);
-        await this.page.waitForTimeout(1000);
         let elapsed = 0;
         let downloadFile;
         do {
