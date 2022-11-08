@@ -70,8 +70,9 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            var workspace = await findWorkspace(projectPath);
-            var files = await findByExtension(workspace, '.alf');
+            var exeDir = path.resolve(__dirname, '..', '..');
+            console.debug(`exeDir: ${exeDir}`);
+            var files = await findByExtension(exeDir, '.alf');
             var alfPath = files[0];
 
             core.debug(`alf Path: "${alfPath}"`);
@@ -89,7 +90,7 @@ async function Run() {
                 password: password,
                 key: '',
                 serial: '',
-                out: workspace,
+                out: exeDir,
             })
             .run()
             .catch(e => {
@@ -98,7 +99,7 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            files = await findByExtension(workspace, '.ulf');
+            files = await findByExtension(exeDir, '.ulf');
             var ulfPath = files[0];
 
             core.debug(`ulf file: "${ulfPath}"`);
