@@ -37539,9 +37539,6 @@ const { Activator } = __nccwpck_require__(3702);
 
 async function Run() {
     try {
-        console.log(`Current working dir: ${process.cwd()}`);
-        console.log(`Current   __dirname: ${__dirname}`);
-
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {
