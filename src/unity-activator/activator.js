@@ -9,7 +9,7 @@ const crawler_1 = require("./crawler");
 const fs_1 = __importDefault(require("fs"));
 class Activator extends crawler_1.Crawler {
     constructor(options) {
-        super(options.debug, options.headless, options.out);
+        super(options.debug, !options.headful, options.out);
         this.options = options;
         this.debug(`options:`, JSON.stringify(this.options));
     }
@@ -70,17 +70,18 @@ class Activator extends crawler_1.Crawler {
                 throw new Error('Verify code is invalid');
         }
         // Step: close update dialog
+        await this.waitForTimeout(2000);
         console.log("  > close update dialog");
         if (await this.exists('#new_conversations_accept_updated_tos_form button.novalidation.accept')) {
             await this.waitAndClick('#new_conversations_accept_updated_tos_form button.novalidation.accept');
+            await this.waitForTimeout(500);
         }
         // Step: upload alf file.
         console.log("  > upload alf file");
         const licenseFile = await this.waitForSelector('input[name="licenseFile"]');
         if (licenseFile === null)
             throw new Error(`'input[name="licenseFile"]' is not found`);
-        const licenseElement = licenseFile;
-        await licenseElement.uploadFile(this.options.file);
+        await licenseFile.uploadFile(this.options.file);
         await this.click('input[name="commit"]');
         // [[ CHECK ]] Not valid for Unity activation license file
         if (!await this.exists('input[id="type_personal"][value="personal"]'))
@@ -104,7 +105,7 @@ class Activator extends crawler_1.Crawler {
         console.log("  > download ulf");
         await this.waitForTimeout(500);
         await this.waitAndClick('input[name="commit"]');
-        const ulf = await this.waitForDownload(60000);
+        const ulf = await this.waitForDownload(50000);
         // [[ CHECK ]] Download failed
         if (!ulf)
             throw new Error("Download failed");
