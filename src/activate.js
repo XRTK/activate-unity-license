@@ -82,7 +82,6 @@ async function Run() {
             console.log(`::group::Download Unity License Activation File`);
 
             await new Activator({
-                debug: true,
                 file: alfPath,
                 username: username,
                 password: password,

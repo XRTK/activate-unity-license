@@ -86,7 +86,7 @@ class Crawler {
     }
     async exists(selector) {
         logger.debug(`exists: ${selector}`);
-        await this.page.waitForTimeout(1000);
+        await this.waitForTimeout(1000);
         try {
             await this.page.waitForSelector(selector, { timeout: 5000 });
             logger.debug(`  -> true`);
@@ -100,7 +100,7 @@ class Crawler {
     ;
     async click(selector, options) {
         logger.debug(`click: ${selector}`);
-        await this.page.waitForTimeout(1000);
+        await this.waitForTimeout(1000);
         await Promise.all([
             this.page.click(selector, options),
             this.page.waitForNavigation({ waitUntil: 'load' }),
@@ -108,7 +108,7 @@ class Crawler {
     }
     async type(selector, text, options) {
         logger.debug(`type: ${selector} => ${text}`);
-        await this.page.waitForTimeout(1000);
+        await this.waitForTimeout(1000);
         return await this.page.type(selector, text, options);
     }
     readUserInput(question, password = false, timeout = 5 * 60 * 1000) {

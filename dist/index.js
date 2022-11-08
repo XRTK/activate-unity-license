@@ -37613,7 +37613,6 @@ async function Run() {
             console.log(`::group::Download Unity License Activation File`);
 
             await new Activator({
-                debug: true,
                 file: alfPath,
                 username: username,
                 password: password,
@@ -37859,7 +37858,7 @@ class Activator extends crawler_1.Crawler {
         // Step: download ulf
         console.log("  > download ulf");
         await this.waitAndClick('input[name="commit"][class="btn mb10"][value="Download license file"]');
-        const ulf = await this.waitForDownload(60000);
+        const ulf = await this.waitForDownload(30000);
         // [[ CHECK ]] Download failed
         if (!ulf)
             throw new Error("Download failed");
@@ -37963,7 +37962,7 @@ class Crawler {
     }
     async exists(selector) {
         logger.debug(`exists: ${selector}`);
-        await this.page.waitForTimeout(1000);
+        await this.waitForTimeout(1000);
         try {
             await this.page.waitForSelector(selector, { timeout: 5000 });
             logger.debug(`  -> true`);
@@ -37977,7 +37976,7 @@ class Crawler {
     ;
     async click(selector, options) {
         logger.debug(`click: ${selector}`);
-        await this.page.waitForTimeout(1000);
+        await this.waitForTimeout(1000);
         await Promise.all([
             this.page.click(selector, options),
             this.page.waitForNavigation({ waitUntil: 'load' }),
@@ -37985,7 +37984,7 @@ class Crawler {
     }
     async type(selector, text, options) {
         logger.debug(`type: ${selector} => ${text}`);
-        await this.page.waitForTimeout(1000);
+        await this.waitForTimeout(1000);
         return await this.page.type(selector, text, options);
     }
     readUserInput(question, password = false, timeout = 5 * 60 * 1000) {

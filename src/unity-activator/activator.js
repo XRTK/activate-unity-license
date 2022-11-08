@@ -103,7 +103,7 @@ class Activator extends crawler_1.Crawler {
         // Step: download ulf
         console.log("  > download ulf");
         await this.waitAndClick('input[name="commit"][class="btn mb10"][value="Download license file"]');
-        const ulf = await this.waitForDownload(60000);
+        const ulf = await this.waitForDownload(30000);
         // [[ CHECK ]] Download failed
         if (!ulf)
             throw new Error("Download failed");
