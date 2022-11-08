@@ -37860,7 +37860,7 @@ class Activator extends crawler_1.Crawler {
         console.log("  > download ulf");
         await this.waitForTimeout(500);
         await this.waitAndClick('input[name="commit"]');
-        const ulf = await this.waitForDownload(50000);
+        const ulf = await this.waitForDownload(60000);
         // [[ CHECK ]] Download failed
         if (!ulf)
             throw new Error("Download failed");
@@ -37928,14 +37928,10 @@ class Crawler {
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
         this.page = (await browser.pages())[0];
-        //
-        // there can be a privilege problem to create a directory
-        //
-        //this.tmpDir = path.join(os.tmpdir(), Math.random().toString(32).substring(2));
-        this.tmpDir = path.join(".", Math.random().toString(32).substring(2));
+        this.tmpDir = path.resolve(__dirname, 'temp');
         fs.mkdirSync(this.tmpDir);
         const _tempDir = path.resolve(this.tmpDir);
-        console.log(`temDir ${_tempDir}`);
+        logger.debug(`temDir: ${_tempDir}`);
         const client = await this.page.target().createCDPSession();
         await client.send('Page.setDownloadBehavior', {
             behavior: 'allow',
