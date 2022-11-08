@@ -70,7 +70,8 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            var files = await findByExtension(path.resolve(__dirname, '..'), '.alf');
+            var workspace = await findWorkspace(__dirname);
+            var files = await findByExtension(workspace, '.alf');
             var alfPath = files[0];
 
             core.debug(`alf Path: "${alfPath}"`);
@@ -87,7 +88,7 @@ async function Run() {
                 password: password,
                 key: '',
                 serial: '',
-                out: path.resolve(__dirname, '..'),
+                out: __dirname,
             })
             .run()
             .catch(e => {
@@ -96,7 +97,7 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            files = await findByExtension(path.resolve(__dirname, '..'), '.ulf');
+            files = await findByExtension(__dirname, '.ulf');
             var ulfPath = files[0];
 
             core.debug(`ulf file: "${ulfPath}"`);
@@ -126,26 +127,48 @@ async function Run() {
 };
 
 const findByExtension = async (dir, ext) => {
+    const directories = [];
     const matchedFiles = [];
     const files = await readdir(dir);
 
     for (const file of files) {
         const item = path.resolve(dir, file);
-        core.debug(`--? ${item}`);
 
         if (fs.statSync(`${dir}/${file}`).isDirectory()) {
-            var nestedMatches = await findByExtension(item, ext);
-
-            for (const nestedMatch of nestedMatches) {
-                matchedFiles.push(nestedMatch);
-            }
+            directories.push(item);
         } else if (file.endsWith(ext)) {
             core.debug(`--> Found! ${item}`);
             matchedFiles.push(item);
+            break;
+        }
+    }
+
+    if (matchedFiles.length == 0) {
+        for(const subDir of directories) {
+            const nestedMatches = await findByExtension(subDir, ext);
+
+            for (const nestedMatch of nestedMatches) {
+                matchedFiles.push(nestedMatch);
+                break;
+            }
         }
     }
 
     return matchedFiles;
+};
+
+const findWorkspace = async (dir) => {
+    core.debug(`Searching for .git root in: ${dir}`);
+    const files = await readdir(dir);
+
+    for (const file of files) {
+        if (file.match('\.git')) {
+            return path.resolve(dir);
+        }
+    }
+
+    const result = await findWorkspace(path.resolve(dir, '..'));
+    return result;
 };
 
 module.exports = { Run }
