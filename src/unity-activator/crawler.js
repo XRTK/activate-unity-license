@@ -57,7 +57,7 @@ class Crawler {
         this.tmpDir = path.join(".", Math.random().toString(32).substring(2));
         fs.mkdirSync(this.tmpDir);
         const _tempDir = path.resolve(this.tmpDir);
-        logger.debug(`temDir ${_tempDir}`);
+        console.log(`temDir ${_tempDir}`);
         const client = await this.page.target().createCDPSession();
         await client.send('Page.setDownloadBehavior', {
             behavior: 'allow',
