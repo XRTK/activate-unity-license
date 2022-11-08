@@ -10,6 +10,9 @@ param(
 try {
     $buildArgs = ""
 
+    $exPath = (Resolve-Path .\).Path
+    Write-Host $exPath
+
     if ( -not [string]::IsNullOrEmpty($buildTarget) ) {
         $buildArgs += "-buildTarget `"$buildTarget`" "
     }

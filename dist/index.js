@@ -37651,8 +37651,8 @@ async function Run() {
             }
 
             // cleanup
-            fs.unlink(alfPath);
-            fs.unlink(ulfPath);
+            fs.unlink(alfPath, () => core.debug(`removed: ${alfPath}`));
+            fs.unlink(ulfPath, () => core.debug(`removed: ${ulfPath}`));
 
             console.log(`::endgroup::`);
         } else {
