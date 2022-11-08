@@ -37854,12 +37854,11 @@ class Activator extends crawler_1.Crawler {
         else {
             await this.waitAndClick('input[id="type_personal"][value="personal"]');
             await this.waitAndClick('input[id="option3"][name="personal_capacity"]');
-            await this.waitAndClick('input[name="commit"][class="btn mb10"]');
+            await this.waitAndClick('input[name="commit"][class="btn mb10"][value="Next"]');
         }
         // Step: download ulf
         console.log("  > download ulf");
-        await this.waitForTimeout(500);
-        await this.waitAndClick('input[name="commit"]');
+        await this.waitAndClick('input[name="commit"][class="btn mb10"][value="Download license file"]');
         const ulf = await this.waitForDownload(60000);
         // [[ CHECK ]] Download failed
         if (!ulf)
@@ -38025,7 +38024,6 @@ class Crawler {
     }
     async waitForDownload(timeout = 5000) {
         logger.debug(`waitForDownload: timeout=${timeout}`);
-        await this.page.waitForNetworkIdle();
         let elapsed = 0;
         let downloadFile;
         do {
