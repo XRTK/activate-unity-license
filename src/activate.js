@@ -84,6 +84,7 @@ async function Run() {
 
             await new Activator({
                 file: alfPath,
+                debug: core.isDebug(),
                 username: username,
                 password: password,
                 key: '',
@@ -116,6 +117,10 @@ async function Run() {
             } catch (error) {
                 //console.error(error.message);
             }
+
+            // cleanup
+            fs.unlink(alfPath);
+            fs.unlink(ulfPath);
 
             console.log(`::endgroup::`);
         } else {
