@@ -70,7 +70,7 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            var workspace = await findWorkspace(__dirname);
+            var workspace = await findWorkspace(projectPath);
             var files = await findByExtension(workspace, '.alf');
             var alfPath = files[0];
 
@@ -89,7 +89,7 @@ async function Run() {
                 password: password,
                 key: '',
                 serial: '',
-                out: __dirname,
+                out: workspace,
             })
             .run()
             .catch(e => {
@@ -98,7 +98,7 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            files = await findByExtension(__dirname, '.ulf');
+            files = await findByExtension(workspace, '.ulf');
             var ulfPath = files[0];
 
             core.debug(`ulf file: "${ulfPath}"`);
