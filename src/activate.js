@@ -92,7 +92,7 @@ async function Run() {
             })
             .run()
             .catch(e => {
-                throw Error(e.message);
+                core.error(e.message);
             });
 
             console.log(`::endgroup::`);
