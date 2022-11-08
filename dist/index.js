@@ -38025,6 +38025,7 @@ class Crawler {
     }
     async waitForDownload(timeout = 5000) {
         logger.debug(`waitForDownload: timeout=${timeout}`);
+        await this.page.waitForNetworkIdle();
         let elapsed = 0;
         let downloadFile;
         do {
