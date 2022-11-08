@@ -87,7 +87,7 @@ async function Run() {
                 password: password,
                 key: '',
                 serial: '',
-                out: __dirname,
+                out: path.resolve(__dirname, '..'),
             })
             .run()
             .catch(e => {
@@ -96,7 +96,7 @@ async function Run() {
 
             console.log(`::endgroup::`);
 
-            files = await findByExtension(__dirname, '.ulf');
+            files = await findByExtension(path.resolve(__dirname, '..'), '.ulf');
             var ulfPath = files[0];
 
             core.debug(`ulf file: "${ulfPath}"`);
@@ -131,6 +131,7 @@ const findByExtension = async (dir, ext) => {
 
     for (const file of files) {
         const item = path.resolve(dir, file);
+        core.debug(`--? ${item}`);
 
         if (fs.statSync(`${dir}/${file}`).isDirectory()) {
             var nestedMatches = await findByExtension(item, ext);
