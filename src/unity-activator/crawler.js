@@ -27,10 +27,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Crawler = void 0;
-const puppeteer_1 = __importDefault(require("puppeteer"));
+const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
 const log4js_1 = require("log4js");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const chromium_1 = require("./types/chromium");
 const logger = (0, log4js_1.getLogger)();
 class Crawler {
     constructor(debug, headless, downloadDir) {
@@ -45,8 +46,9 @@ class Crawler {
     }
     async run() {
         logger.debug(`Run crawler: headless=${this.headless}`);
-        const browser = await puppeteer_1.default.launch({
+        const browser = await puppeteer_core_1.default.launch({
             headless: this.headless,
+            executablePath: chromium_1.chromium,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
         this.page = (await browser.pages())[0];
