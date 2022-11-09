@@ -1,0 +1,26 @@
+name: 'Unity License Activation (XRTK)'
+description: 'Runs Unity with the provided options'
+branding:
+  icon: 'at-sign'
+  color: 'blue'
+inputs:
+  username:
+    description: 'Unity Username'
+    required: true
+    default: ''
+  password:
+    description: 'Unity Password'
+    required: true
+    default: ''
+  license-type:
+    description: 'License type to activate (professional or personal)'
+    required: false
+    default: 'Personal'
+  serial:
+    description: 'Unity Serial (Only used for Professional license type)'
+    required: false
+    default: ''
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+  post: 'dist/index.js'

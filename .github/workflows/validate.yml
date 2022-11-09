@@ -1,0 +1,79 @@
+name: validate
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - '*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+
+jobs:
+  validate:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      #max-parallel: 2 # Use this if you're activating pro license with matrix
+      matrix:
+        include:
+          - os: ubuntu-latest
+            build-target: StandaloneLinux64
+          - os: windows-latest
+            build-target: StandaloneWindows64
+          - os: macos-latest
+            build-target: StandaloneOSX
+
+    steps:
+      - name: checkout self
+        uses: actions/checkout@v3
+
+      - run: npm install
+
+      - name: checkout test project
+        uses: actions/checkout@v3
+        with:
+          repository: xrtk/com.xrtk.test
+          path: test-project
+
+      - uses: xrtk/unity-setup@v4
+        with:
+          version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
+
+      - name: xrtk/activate-unity-license
+        uses: ./
+        with:
+          # Required
+          username: ${{ secrets.UNITY_USERNAME }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+          # Optional
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
+          serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
+
+      - name: Unity Build (${{ matrix.build-target }})
+        uses: xrtk/unity-action@refactor
+        with:
+          log-name: 'project-validation'
+          args: '-quit -nographics -batchmode -executeMethod XRTK.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject'
+
+      - uses: actions/upload-artifact@v3
+        name: Upload Artifacts
+        if: always()
+        with:
+          name: '${{ runner.os }}-${{ matrix.build-target }}-Artifacts'
+          path: '${{ env.UNITY_PROJECT_PATH }}/Builds'
+
+      - name: Clean Artifacts
+        if: always()
+        run: |
+          # Clean Artifacts
+          $artifacts = "${{ env.UNITY_PROJECT_PATH }}/Builds"
+
+          if (Test-Path -Path $artifacts) {
+            Remove-Item $artifacts -Force -Recurse
+          }
+        shell: pwsh
