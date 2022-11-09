@@ -27,10 +27,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Crawler = void 0;
-const puppeteer_1 = __importDefault(require("puppeteer"));
+const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
 const log4js_1 = require("log4js");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const os_1 = __importDefault(require("os"));
 const logger = (0, log4js_1.getLogger)();
 class Crawler {
     constructor(debug, headless, downloadDir) {
@@ -45,8 +46,19 @@ class Crawler {
     }
     async run() {
         logger.debug(`Run crawler: headless=${this.headless}`);
-        const browser = await puppeteer_1.default.launch({
+        let chrome = undefined;
+        if (os_1.default.platform() === 'linux') {
+            chrome = '/usr/bin/google-chrome';
+        }
+        else if (os_1.default.platform() === 'win32') {
+            chrome = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe';
+        }
+        else if (os_1.default.platform() === 'darwin') {
+            chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+        }
+        const browser = await puppeteer_core_1.default.launch({
             headless: this.headless,
+            executablePath: chrome,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
         this.page = (await browser.pages())[0];
