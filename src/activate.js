@@ -71,7 +71,7 @@ async function Run() {
             console.log(`::endgroup::`);
 
             var exeDir = path.resolve(process.cwd());
-            console.debug(`exeDir: ${exeDir}`);
+            core.debug(`exeDir: ${exeDir}`);
             var files = await findByExtension(exeDir, '.alf');
             var alfPath = files[0];
 
