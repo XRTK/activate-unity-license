@@ -34592,7 +34592,7 @@ class Crawler {
             chrome = '/usr/bin/google-chrome';
         }
         else if (os_1.default.platform() === 'win32') {
-            chrome = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe';
+            chrome = path.resolve('Program Files (x86)', 'chrome.exe');
         }
         else if (os_1.default.platform() === 'darwin') {
             chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
