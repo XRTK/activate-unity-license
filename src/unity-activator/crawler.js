@@ -59,6 +59,7 @@ class Crawler {
         const browser = await puppeteer_core_1.default.launch({
             headless: this.headless,
             executablePath: chrome,
+            ignoreDefaultArgs: ['--disable-extensions'],
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
         this.page = (await browser.pages())[0];
