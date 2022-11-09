@@ -34568,7 +34568,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Crawler = void 0;
-const puppeteer_core_1 = __importDefault(__nccwpck_require__(4807));
+const puppeteer_core_1 = __importStar(__nccwpck_require__(4807));
 const log4js_1 = __nccwpck_require__(3048);
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
@@ -34592,7 +34592,9 @@ class Crawler {
             chrome = '/usr/bin/google-chrome';
         }
         else if (os_1.default.platform() === 'win32') {
-            chrome = path.resolve('Program Files (x86)', 'chrome.exe');
+            const browserFetcher = new puppeteer_core_1.BrowserFetcher({ path: path.join(__dirname, '.cache', 'puppeteer'), product: 'chrome' });
+            const revisionInfo = await browserFetcher.download('1056772');
+            chrome = revisionInfo === null || revisionInfo === void 0 ? void 0 : revisionInfo.executablePath;
         }
         else if (os_1.default.platform() === 'darwin') {
             chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -34600,7 +34602,6 @@ class Crawler {
         const browser = await puppeteer_core_1.default.launch({
             headless: this.headless,
             executablePath: chrome,
-            ignoreDefaultArgs: ['--disable-extensions'],
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
         this.page = (await browser.pages())[0];
