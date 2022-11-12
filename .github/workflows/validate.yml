@@ -51,8 +51,9 @@ jobs:
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
-          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
+          license-file: ${{ secrets.UNITY_LICENSE_SERIAL }} # Uses a pre-generated .alf license request (for personal activations only!)
 
       - name: Unity Build (${{ matrix.build-target }})
         uses: xrtk/unity-action@v4

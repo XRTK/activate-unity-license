@@ -52,7 +52,7 @@ async function Run() {
 
             // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
             var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
-            core.group(`Activate Unity Professional License`);
+            core.startGroup(`Activate Unity Professional License`);
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
@@ -65,7 +65,7 @@ async function Run() {
             var ulfSecret = process.env.UNITY_LICENSE_FILE;
 
             if (!ulfSecret) {
-                core.group(`Generate Unity License Request File`);
+                core.startGroup(`Generate Unity License Request File`);
 
                 try {
                     exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
@@ -84,7 +84,7 @@ async function Run() {
                     throw Error(`Failed to find generated license alf request file!`);
                 }
 
-                core.group(`Download Unity License Activation File`);
+                core.startGroup(`Download Unity License Activation File`);
 
                 await new Activator({
                     file: alfPath,
@@ -117,7 +117,7 @@ async function Run() {
             // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
             args = `-quit -nographics -batchmode -manualLicenseFile ""${ulfPath}""`;
 
-            core.group(`Activate Unity Personal License`);
+            core.startGroup(`Activate Unity Personal License`);
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
