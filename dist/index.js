@@ -34268,7 +34268,12 @@ async function Run() {
 
                 core.endGroup();
             } else {
-                fs.writeFileSync(path.resolve(exeDir, '.ulf'), ulfLicenseFile, 'utf8');
+                const regex = `(?<version>(?:(?<major>\\d+)\\.)?(?:(?<minor>\\d+)\\.)?(?:(?<patch>\\d+[fab]\\d+)\\b))|((?:\\((?<revision>\\w+))\\))`;
+                const match = editorPath.match(regex);
+                const version = match['version'];
+                const ulfFilePath = `Unity_v${version}.ulf`;
+                core.debug(`ulfFilePath: ${ulfFilePath}`);
+                fs.writeFileSync(path.resolve(exeDir, ulfFilePath), ulfLicenseFile, 'utf8');
             }
 
             files = await findByExtension(exeDir, '.ulf');
