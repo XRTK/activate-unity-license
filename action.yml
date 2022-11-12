@@ -12,12 +12,16 @@ inputs:
     description: 'Unity Password'
     required: true
     default: ''
+  serial:
+    description: 'Unity Serial (Only used for Professional license type)'
+    required: false
+    default: ''
   license-type:
     description: 'License type to activate (professional or personal)'
     required: false
     default: 'Personal'
-  serial:
-    description: 'Unity Serial (Only used for Professional license type)'
+  license-file:
+    description: 'Contents of a pre-generated .alf license request file'
     required: false
     default: ''
 runs:
