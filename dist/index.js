@@ -34228,9 +34228,9 @@ async function Run() {
             var exeDir = path.resolve(process.cwd());
             core.debug(`exeDir: ${exeDir}`);
 
-            var ulfSecret = process.env.UNITY_LICENSE_FILE;
+            var ulfLicenseFile = core.getInput('license-file');
 
-            if (!ulfSecret) {
+            if (!ulfLicenseFile) {
                 core.startGroup(`Generate Unity License Request File`);
 
                 try {
@@ -34268,7 +34268,7 @@ async function Run() {
 
                 core.endGroup();
             } else {
-                fs.writeFileSync(path.resolve(exeDir, '.ulf'), ulfSecret, 'utf8');
+                fs.writeFileSync(path.resolve(exeDir, '.ulf'), ulfLicenseFile, 'utf8');
             }
 
             files = await findByExtension(exeDir, '.ulf');
