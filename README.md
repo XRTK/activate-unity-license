@@ -72,5 +72,5 @@ jobs:
           # Optional
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
           license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
-          license-file: ${{ secrets.UNITY_LICENSE_SERIAL }} # Uses a pre-generated .alf license request (for personal activations only!)
+          license-file: ${{ secrets.UNITY_LICENSE_FILE }} # Uses a pre-generated .alf license request (for personal activations only!)
 ```
