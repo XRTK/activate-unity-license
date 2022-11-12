@@ -20,10 +20,6 @@ inputs:
     description: 'License type to activate (professional or personal)'
     required: false
     default: 'Personal'
-  license-file:
-    description: 'Contents of a pre-generated .alf license request file'
-    required: false
-    default: ''
 runs:
   using: 'node16'
   main: 'dist/index.js'
