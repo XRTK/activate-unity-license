@@ -30,9 +30,6 @@ This action requires several secrets that need to be setup in the repository or 
 * `UNITY_USERNAME` The email address you use for your Unity Id
 * `UNITY_PASSWORD` The password you use for Unity Id access
 * `UNITY_SERIAL` (Required for pro/plus activations)
-* `UNITY_LICENSE_FILE` (Optional, `.ulf` license file for personal activations ONLY)
-  * See instructions on how to generate, activate, and download a license file for [windows](https://docs.unity3d.com/Manual/ManualActivationCmdWin.html) or [macos](https://docs.unity3d.com/Manual/ManualActivationCmdMac.html).
-  * To set this secret in GitHub, copy and paste the contents of the .ulf license file text into the secret value.
 
 > Don't forget that pro/plus licenses only support 2 active licenses at a time!
 
@@ -72,5 +69,4 @@ jobs:
           # Optional
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
           license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
-          license-file: ${{ secrets.UNITY_LICENSE_FILE }} # Uses a pre-generated .alf license request (for personal activations only!)
 ```
