@@ -32,10 +32,9 @@ async function Run() {
             throw Error('Missing password input');
         }
 
-        var licenseType = core.getInput('license-type');
-
         var pwsh = await io.which("pwsh", true);
         var unity_action = path.resolve(__dirname, 'unity-action.ps1');
+        var licenseType = core.getInput('license-type');
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
@@ -50,18 +49,15 @@ async function Run() {
             var maskedSerial = serial.slice(0, -4) + `XXXX`;
             core.setSecret(maskedSerial);
 
-            // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
-            var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
             core.startGroup(`Activate Unity Professional License`);
+            var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
-            var exitCode = 0;
-            var args = `-quit -nographics -batchmode -createManualActivationFile`; //-username ${username} -password ${password}
-            var exeDir = path.resolve(process.cwd());
-            core.debug(`exeDir: ${exeDir}`);
             core.startGroup(`Generate Unity License Request File`);
+            var exitCode = 0;
+            var args = `-quit -nographics -batchmode -createManualActivationFile`;
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
@@ -71,6 +67,8 @@ async function Run() {
 
             core.endGroup();
 
+            var exeDir = path.resolve(process.cwd());
+            core.debug(`exeDir: ${exeDir}`);
             var files = await findByExtension(exeDir, '.alf');
             var alfPath = files[0];
 
@@ -107,10 +105,8 @@ async function Run() {
                 throw Error(`Failed to find manual license ulf file!`);
             }
 
-            // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
-            args = `-quit -nographics -batchmode -manualLicenseFile ""${ulfPath}""`;
-
             core.startGroup(`Activate Unity Personal License`);
+            args = `-quit -nographics -batchmode -manualLicenseFile ""${ulfPath}""`;
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
