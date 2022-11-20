@@ -12,14 +12,14 @@ inputs:
     description: 'Unity Password'
     required: true
     default: ''
-  license-type:
-    description: 'License type to activate (professional or personal)'
-    required: false
-    default: 'Personal'
   serial:
     description: 'Unity Serial (Only used for Professional license type)'
     required: false
     default: ''
+  license-type:
+    description: 'License type to activate (professional or personal)'
+    required: false
+    default: 'Personal'
 runs:
   using: 'node16'
   main: 'dist/index.js'

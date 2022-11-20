@@ -34198,10 +34198,9 @@ async function Run() {
             throw Error('Missing password input');
         }
 
-        var licenseType = core.getInput('license-type');
-
         var pwsh = await io.which("pwsh", true);
         var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
+        var licenseType = core.getInput('license-type');
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
@@ -34214,19 +34213,17 @@ async function Run() {
             // Unity only likes to mask the last 4 characters of serial.
             // Let's mask all of it.
             var maskedSerial = serial.slice(0, -4) + `XXXX`;
-            console.log(`::add-mask::${maskedSerial}`);
+            core.setSecret(maskedSerial);
 
-            // -quit -batchmode -username name@example.com -password XXXXXXXXXXXXX -serial E3-XXXX-XXXX-XXXX-XXXX-XXXX
+            core.startGroup(`Activate Unity Professional License`);
             var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
-            console.log(`::group::Activate Unity Professional License`);
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
-            console.log(`::endgroup::`);
+            core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
-            var args = `-quit -nographics -batchmode -createManualActivationFile`; //-username ${username} -password ${password}
+            core.startGroup(`Generate Unity License Request File`);
             var exitCode = 0;
-
-            console.log(`::group::Generate Unity License Request File`);
+            var args = `-quit -nographics -batchmode -createManualActivationFile`;
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
@@ -34234,7 +34231,7 @@ async function Run() {
                 //console.error(error.message);
             }
 
-            console.log(`::endgroup::`);
+            core.endGroup();
 
             var exeDir = path.resolve(process.cwd());
             core.debug(`exeDir: ${exeDir}`);
@@ -34247,7 +34244,7 @@ async function Run() {
                 throw Error(`Failed to find generated license alf request file!`);
             }
 
-            console.log(`::group::Download Unity License Activation File`);
+            core.startGroup(`Download Unity License Activation File`);
 
             await new Activator({
                 file: alfPath,
@@ -34263,7 +34260,7 @@ async function Run() {
                 core.error(e.message);
             });
 
-            console.log(`::endgroup::`);
+            core.endGroup();
 
             files = await findByExtension(exeDir, '.ulf');
             var ulfPath = files[0];
@@ -34274,10 +34271,8 @@ async function Run() {
                 throw Error(`Failed to find manual license ulf file!`);
             }
 
-            // "-batchmode -manualLicenseFile ./UnityLicenseRequest.ulf"
+            core.startGroup(`Activate Unity Personal License`);
             args = `-quit -nographics -batchmode -manualLicenseFile ""${ulfPath}""`;
-
-            console.log(`::group::Activate Unity Personal License`);
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
@@ -34289,7 +34284,7 @@ async function Run() {
             fs.unlink(alfPath, () => core.debug(`removed: ${alfPath}`));
             fs.unlink(ulfPath, () => core.debug(`removed: ${ulfPath}`));
 
-            console.log(`::endgroup::`);
+            core.endGroup();
         } else {
             core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`);
         }

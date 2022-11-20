@@ -61,12 +61,12 @@ jobs:
       - uses: xrtk/unity-setup@v4
 
         # Activates the installation with the provided credentials
-      - uses: xrtk/activate-unity-license@v1
+      - uses: xrtk/activate-unity-license@v2
         with:
           # Required
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
-          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
 ```
