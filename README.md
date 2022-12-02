@@ -44,11 +44,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            build-target: StandaloneLinux64
+            build-targets: StandaloneLinux64
           - os: windows-latest
-            build-target: StandaloneWindows64
+            build-targets: StandaloneWindows64
           - os: macos-latest
-            build-target: StandaloneOSX
+            build-targets: StandaloneOSX
 
     steps:
       - name: checkout self
