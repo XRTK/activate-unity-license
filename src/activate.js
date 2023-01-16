@@ -59,6 +59,11 @@ async function Run() {
         } else if (licenseType.toLowerCase().startsWith('per')) {
             var licenseDir = path.resolve(os.tmpdir(), 'license', 'unity');
             core.debug(`licenseDir: ${licenseDir}`);
+
+            if (!fs.existsSync(licenseDir)) {
+                fs.mkdirSync(licenseDir);
+            }
+
             // if personal license check if we've cached a previous version
             const key = `xrtk-unity-license-${process.platform}`;
             core.debug('Attempting to restore cached license file...');
