@@ -57,7 +57,8 @@ async function Run() {
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
-            var licenseDir = path.resolve(os.tmpdir(), 'license', 'unity');
+            const tempDirectory = process.env['RUNNER_TEMP'] || '';
+            var licenseDir = path.resolve(tempDirectory, 'license', 'unity');
             core.debug(`licenseDir: ${licenseDir}`);
 
             if (!fs.existsSync(licenseDir)) {
