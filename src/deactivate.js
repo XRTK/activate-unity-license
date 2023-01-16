@@ -9,7 +9,7 @@ async function Run() {
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // return license if pro/plus
-            console.log(`::group::Returning ${licenseType} Unity License`);
+            core.startGroup(`Returning ${licenseType} Unity License`);
 
             var editorPath = process.env.UNITY_EDITOR_PATH;
 
@@ -47,7 +47,7 @@ async function Run() {
                 console.error(error.message);
             }
 
-            console.log(`::endgroup::`);
+            core.endGroup();
 
             if (exitCode != 0) {
                 throw Error(`Failed to deactivate license! errorCode: ${exitCode}`);

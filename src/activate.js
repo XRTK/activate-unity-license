@@ -1,44 +1,47 @@
 const core = require('@actions/core');
+const cache = require('@actions/cache');
 const exec = require('@actions/exec');
 const io = require('@actions/io');
 const fs = require("fs");
-const path = require('path');
 const { readdir } = require('fs/promises');
+const os = require("os");
+const path = require('path');
 const { Activator } = require('./unity-activator/activator');
+const { default: cac } = require('cac');
 
 async function Run() {
     try {
-        var editorPath = process.env.UNITY_EDITOR_PATH;
+        const editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {
             throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
         }
 
-        var projectPath = process.env.UNITY_PROJECT_PATH;
+        const projectPath = process.env.UNITY_PROJECT_PATH;
 
         if (!projectPath) {
             throw Error("Missing UNITY_PROJECT_PATH! Requires xrtk/unity-setup to run before this step.");
         }
 
-        var username = core.getInput('username');
+        const username = core.getInput('username');
 
         if (!username) {
             throw Error('Missing username input');
         }
 
-        var password = core.getInput('password');
+        const password = core.getInput('password');
 
         if (!password) {
             throw Error('Missing password input');
         }
 
-        var pwsh = await io.which("pwsh", true);
-        var unity_action = path.resolve(__dirname, 'unity-action.ps1');
-        var licenseType = core.getInput('license-type');
+        const pwsh = await io.which("pwsh", true);
+        const unity_action = path.resolve(__dirname, 'unity-action.ps1');
+        const licenseType = core.getInput('license-type');
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             // if pro/plus license activate by using UNITY_SERIAL env variable
-            var serial = core.getInput('serial');
+            const serial = core.getInput('serial');
 
             if (!serial) {
                 throw Error('Missing serial input');
@@ -46,7 +49,7 @@ async function Run() {
 
             // Unity only likes to mask the last 4 characters of serial.
             // Let's mask all of it.
-            var maskedSerial = serial.slice(0, -4) + `XXXX`;
+            const maskedSerial = serial.slice(0, -4) + `XXXX`;
             core.setSecret(maskedSerial);
 
             core.startGroup(`Activate Unity Professional License`);
@@ -54,55 +57,67 @@ async function Run() {
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
-            // if personal license activate by using requesting activation file
-            core.startGroup(`Generate Unity License Request File`);
-            var exitCode = 0;
-            var args = `-quit -nographics -batchmode -createManualActivationFile`;
+            var licenseDir = path.resolve(os.tmpdir(), 'license', 'unity');
+            core.debug(`licenseDir: ${licenseDir}`);
+            // if personal license check if we've cached a previous version
+            const key = `xrtk-unity-license-${process.platform}`;
+            core.debug('Attempting to restore cached license file...');
+            const isCached = await cache.restoreCache([licenseDir], key);
 
-            try {
-                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
-            } catch (error) {
-                //console.error(error.message);
+            if (!isCached) {
+                // Request an activation alf file
+                core.startGroup(`Generate Unity License Request File`);
+                var exitCode = 0;
+                var args = `-quit -nographics -batchmode -createManualActivationFile`;
+
+                try {
+                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
+                } catch (error) {
+                    //console.error(error.message);
+                }
+
+                core.endGroup();
+                var files = await findByExtension(licenseDir, '.alf');
+                var alfPath = files[0];
+
+                core.debug(`alf Path: "${alfPath}"`);
+
+                if (!alfPath) {
+                    throw Error(`Failed to find generated license alf request file!`);
+                }
+
+                core.startGroup(`Download Unity License Activation File`);
+
+                await new Activator({
+                    file: alfPath,
+                    debug: core.isDebug(),
+                    username: username,
+                    password: password,
+                    key: '',
+                    serial: '',
+                    out: licenseDir,
+                })
+                .run()
+                .catch(e => {
+                    core.setFailed(e.message);
+                });
             }
 
             core.endGroup();
 
-            var exeDir = path.resolve(process.cwd());
-            core.debug(`exeDir: ${exeDir}`);
-            var files = await findByExtension(exeDir, '.alf');
-            var alfPath = files[0];
-
-            core.debug(`alf Path: "${alfPath}"`);
-
-            if (!alfPath) {
-                throw Error(`Failed to find generated license alf request file!`);
-            }
-
-            core.startGroup(`Download Unity License Activation File`);
-
-            await new Activator({
-                file: alfPath,
-                debug: core.isDebug(),
-                username: username,
-                password: password,
-                key: '',
-                serial: '',
-                out: exeDir,
-            })
-            .run()
-            .catch(e => {
-                core.error(e.message);
-            });
-
-            core.endGroup();
-
-            files = await findByExtension(exeDir, '.ulf');
+            files = await findByExtension(licenseDir, '.ulf');
             var ulfPath = files[0];
 
             core.debug(`ulf file: "${ulfPath}"`);
 
             if (!ulfPath) {
                 throw Error(`Failed to find manual license ulf file!`);
+            }
+
+            if (!isCached) {
+              await cache.saveCache(licenseDir, key).catch(e=> {
+                  core.warning(`Failed to cache unity license file!\n${e}`);
+              });
             }
 
             core.startGroup(`Activate Unity Personal License`);
