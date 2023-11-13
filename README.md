@@ -52,16 +52,16 @@ jobs:
 
     steps:
       - name: checkout self
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
         # Installs the Unity Editor based on your project version text file
         # sets -> env.UNITY_EDITOR_PATH
         # sets -> env.UNITY_PROJECT_PATH
         # https://github.com/XRTK/unity-setup
-      - uses: xrtk/unity-setup@v6
+      - uses: xrtk/unity-setup@v7.2
 
         # Activates the installation with the provided credentials
-      - uses: xrtk/activate-unity-license@v2
+      - uses: xrtk/activate-unity-license@v3
         with:
           # Required
           username: ${{ secrets.UNITY_USERNAME }}
