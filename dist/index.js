@@ -34214,9 +34214,8 @@ async function Run() {
             // Let's mask all of it.
             var maskedSerial = serial.slice(0, -4) + `XXXX`;
             core.setSecret(maskedSerial);
-
             core.startGroup(`Activate Unity Professional License`);
-            var args = `-quit -nographics -batchmode -username ${username} -password ${password} -serial ${serial}`;
+            var args = `-quit -nographics -batchmode -serial ${serial} -username ${username} -password ${password}`;
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
@@ -34224,7 +34223,6 @@ async function Run() {
             core.startGroup(`Generate Unity License Request File`);
             var exitCode = 0;
             var args = `-quit -nographics -batchmode -createManualActivationFile`;
-
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
             } catch (error) {
@@ -54093,7 +54091,6 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const activate = __nccwpck_require__(3816);
 const deactivate = __nccwpck_require__(8162);
-
 const IsPost = !!core.getState('isPost');
 
 const main = async () => {

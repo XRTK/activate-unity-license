@@ -10,15 +10,17 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
 concurrency:
   group: ${{ github.ref }}
+
+env:
+  UNITY_PROJECT_PATH: ''
 
 jobs:
   validate:
     runs-on: ${{ matrix.os }}
     strategy:
-      #max-parallel: 2 # Use this if you're activating pro license with matrix
+      max-parallel: 2 # Use this if you're activating pro license with matrix
       matrix:
         include:
           - os: ubuntu-latest
@@ -30,17 +32,17 @@ jobs:
 
     steps:
       - name: checkout self
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - run: npm install
 
       - name: checkout test project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: xrtk/com.xrtk.test
           path: test-project
 
-      - uses: xrtk/unity-setup@v6
+      - uses: xrtk/unity-setup@v7.2
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
 
@@ -52,10 +54,10 @@ jobs:
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
-          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
+          license-type: 'Professional' # Chooses license type to use [ Personal, Professional ]
 
       - name: Unity Build (${{ matrix.build-target }})
-        uses: xrtk/unity-action@v4
+        uses: xrtk/unity-action@v6
         with:
           log-name: 'project-validation'
           args: '-quit -nographics -batchmode -executeMethod XRTK.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject'

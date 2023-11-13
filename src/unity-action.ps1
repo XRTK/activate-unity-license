@@ -7,10 +7,11 @@ param(
     [String]$logName = "Unity"
 )
 
-try {
-    $buildArgs = ""
+$buildArgs = ""
+$process = $null
 
-    if ( -not [string]::IsNullOrEmpty($buildTarget) ) {
+try {
+    if (-not [string]::IsNullOrEmpty($buildTarget)) {
         $buildArgs += "-buildTarget `"$buildTarget`" "
     }
 
@@ -27,12 +28,11 @@ try {
 
         $logDirectory = "$projectPath/Builds/Logs"
 
-        if ( -not (Test-Path -Path $logDirectory)) {
+        if (-not (Test-Path -Path $logDirectory)) {
             $logDirectory = New-Item -ItemType Directory -Force -Path $logDirectory | Select-Object
         }
 
         Write-Host "Log Directory: $logDirectory"
-
         $date = Get-Date -Format "yyyyMMddTHHmmss"
         $fullLogName = "$logDirectory/$logName-$date"
         $logPath = "$fullLogName.log"
@@ -41,37 +41,34 @@ try {
 
     $additionalArgs = $additionalArgs.Trim()
 
-    if ( $additionalArgs -like "*runEditorTests" ) {
+    if ($additionalArgs -like "*runEditorTests") {
         $testPath = "$fullLogName.xml"
         $additionalArgs += " -editorTestsResultFile `"$testPath`""
     }
 
     $buildArgs = $buildArgs.Trim()
-
     $buildArgs += " $additionalArgs"
-
     $process = Start-Process -FilePath "$editorPath" -ArgumentList "$buildArgs" -PassThru
-
     $ljob = Start-Job -ScriptBlock {
         param($log)
 
-        while ( -not (Test-Path $log -Type Leaf) ) {
+        while (-not (Test-Path -Path $log -Type Leaf)) {
             Start-Sleep -Milliseconds 1
         }
 
-        Get-Content "$log" -Wait
+        Get-Content -Path $log -Wait | Write-Host
     } -ArgumentList $logPath
 
     $processId = $process.Id
+    Write-Output "::debug::Unity Process ID: $processId"
+    $processId | Out-File -FilePath "$env:GITHUB_WORKSPACE/unity-process-id.txt"
 
-    while ( -not $process.HasExited )
-    {
+    while (-not $process.HasExited) {
         # While waiting, Get-Content checks the file once each second
         Start-Sleep -Milliseconds 1
         Receive-Job $ljob
 
-        if ( $null -eq (Get-Process -Id $processId -ErrorAction SilentlyContinue) )
-        {
+        if ($null -eq (Get-Process -Id $processId -ErrorAction SilentlyContinue)) {
             break
         }
     }
@@ -82,8 +79,7 @@ try {
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
     do {
-        try
-        {
+        try {
             if (Test-Path -Path $logPath) {
                 $file = Convert-Path $logPath
                 $fileStream = [System.IO.File]::Open($file,'Open','Write')
@@ -93,15 +89,13 @@ try {
             } else {
                 $fileLocked = $false
             }
-        }
-        catch
-        {
+        } catch {
             $fileLocked = $true
+            Start-Sleep -Milliseconds 1
         }
 
-        if ( $stopwatch.elapsed -lt $timeout )
-        {
-            if ( (-not $global:PSVersionTable.Platform) -or ($global:PSVersionTable.Platform -eq "Win32NT") ) {
+        if ($stopwatch.elapsed -lt $timeout) {
+            if ((-not $global:PSVersionTable.Platform) -or ($global:PSVersionTable.Platform -eq "Win32NT")) {
                 $procsWithParent = Get-CimInstance -ClassName "win32_process" | Select-Object ProcessId,ParentProcessId
                 $orphaned = $procsWithParent | Where-Object -Property ParentProcessId -NotIn $procsWithParent.ProcessId
                 $procs = Get-Process -IncludeUserName | Where-Object -Property Id -In $orphaned.ProcessId | Where-Object { $_.UserName -match $env:username }
@@ -110,17 +104,22 @@ try {
         }
 
         Start-Sleep -Milliseconds 1
-    } while ( $fileLocked )
+    } while ($fileLocked)
 
     Start-Sleep -Milliseconds 1
-
     # Clean up job
     Receive-Job $ljob
     Stop-Job $ljob
     Remove-Job $ljob
-
     exit $process.ExitCode
 }
 catch {
+    $errorMessage = $_.Exception.Message
+    Write-Host "::error::An error occurred running unity-action.ps1: $errorMessage"
+
+    if ($process -and (-not $process.HasExited)) {
+        $process.Kill()
+    }
+
     exit 1
 }
