@@ -20,6 +20,11 @@ inputs:
     description: 'License type to activate (professional or personal)'
     required: false
     default: 'Personal'
+  auth-key:
+    description: "2FA (Authenticator App) key"
+    required: false
+    default: ''
+
 runs:
   using: 'node16'
   main: 'dist/index.js'

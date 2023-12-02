@@ -10,6 +10,7 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
 concurrency:
   group: ${{ github.ref }}
 
@@ -20,7 +21,8 @@ jobs:
   validate:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 2 # Use this if you're activating pro license with matrix
+      fail-fast: false
+      #max-parallel: 2 # Use this if you're activating pro license with matrix
       matrix:
         include:
           - os: ubuntu-latest
@@ -42,10 +44,17 @@ jobs:
           repository: xrtk/com.xrtk.test
           path: test-project
 
+        # Installs the Unity Editor based on your project version text file
+        # sets -> env.UNITY_EDITOR_PATH
+        # sets -> env.UNITY_PROJECT_PATH
+        # https://github.com/XRTK/unity-setup
       - uses: xrtk/unity-setup@v7.2
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
+          build-targets: ${{ matrix.build-target }}
 
+        # Activates the installation with the provided credentials
+        # https://github.com/XRTK/activate-unity-license
       - name: xrtk/activate-unity-license
         uses: ./
         with:
@@ -53,8 +62,9 @@ jobs:
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
-          license-type: 'Professional' # Chooses license type to use [ Personal, Professional ]
+          auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
 
       - name: Unity Build (${{ matrix.build-target }})
         uses: xrtk/unity-action@v6
