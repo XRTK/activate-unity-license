@@ -84,4 +84,7 @@ To activate new two factor authentication for your Unity account:
 3. Select `Start setup`
 4. Input password if prompted
 5. Select `Authenticator App` to receive codes, then `Next`
-6.
+6. Click `Can't Scan the barcode?`
+7. Copy the 16 character key
+8. Create new secret `UNITY_2FA_KEY` and save the generated key from the previous step
+9. Scan the QR code in your Authenticator app and verify the code.

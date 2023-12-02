@@ -44213,6 +44213,8 @@ async function Run() {
             throw Error('Missing password input');
         }
 
+        var authKey = core.getInput('auth-key');
+
         var pwsh = await io.which("pwsh", true);
         var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
         var licenseType = core.getInput('license-type');
@@ -44264,7 +44266,7 @@ async function Run() {
                 debug: core.isDebug(),
                 username: username,
                 password: password,
-                key: '',
+                key: authKey,
                 serial: '',
                 out: exeDir,
             })
