@@ -4,7 +4,7 @@ const io = require('@actions/io');
 const fs = require("fs");
 const path = require('path');
 const { readdir } = require('fs/promises');
-const { Activator } = require('./unity-activator/activator');
+const { Activator } = require('unity-activate/dist/activator');
 
 async function Run() {
     try {
@@ -31,6 +31,8 @@ async function Run() {
         if (!password) {
             throw Error('Missing password input');
         }
+
+        var authKey = core.getInput('auth-key');
 
         var pwsh = await io.which("pwsh", true);
         var unity_action = path.resolve(__dirname, 'unity-action.ps1');
@@ -83,7 +85,7 @@ async function Run() {
                 debug: core.isDebug(),
                 username: username,
                 password: password,
-                key: '',
+                key: authKey,
                 serial: '',
                 out: exeDir,
             })

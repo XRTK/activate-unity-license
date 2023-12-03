@@ -1,6 +1,6 @@
 {
   "name": "activate-unity-license",
-  "version": "2.0.0",
+  "version": "4.0.0",
   "description": "An atomic GitHub Action that activates the Unity Engine license via cli with the provided secret parameters.",
   "main": "src/index.js",
   "dependencies": {
@@ -8,11 +8,7 @@
     "@actions/exec": "^1.1.1",
     "@actions/github": "^5.1.1",
     "@actions/io": "^1.1.2",
-    "@jsbits/get-package-version": "^1.0.3",
-    "cac": "^6.7.1",
-    "log4js": "^6.3.0",
-    "otplib": "^12.0.1",
-    "puppeteer-core": "^19.2.2"
+    "unity-activate": "^1.4.1"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.34.0"

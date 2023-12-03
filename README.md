@@ -29,7 +29,8 @@ This action requires several secrets that need to be setup in the repository or 
 
 * `UNITY_USERNAME` The email address you use for your Unity Id
 * `UNITY_PASSWORD` The password you use for Unity Id access
-* `UNITY_SERIAL` (Required for pro/plus activations)
+* `UNITY_SERIAL` Optional, but required for pro/plus activations
+* `UNITY_2FA_KEY` Optional, but required for personal activations [2FA Auth Key Setup Steps](#2fa-auth-key-setup-steps)
 
 > Don't forget that pro/plus licenses only support 2 active licenses at a time!
 
@@ -40,7 +41,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      #max-parallel: 2 # Use this if you're activating pro license with matrix
+      max-parallel: 2 # Use this if you're activating pro license with matrix
       matrix:
         include:
           - os: ubuntu-latest
@@ -59,6 +60,8 @@ jobs:
         # sets -> env.UNITY_PROJECT_PATH
         # https://github.com/XRTK/unity-setup
       - uses: xrtk/unity-setup@v7.2
+        with:
+          build-targets: ${{ matrix.build-target }}
 
         # Activates the installation with the provided credentials
       - uses: xrtk/activate-unity-license@v3
@@ -67,6 +70,21 @@ jobs:
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
+          license-type: 'Professional' # Chooses license type to use [ Personal, Professional ]
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
-          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
+          # auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
 ```
+
+### 2FA Auth Key Setup Steps
+
+To activate new two factor authentication for your Unity account:
+
+1. Login to Unity account and navigate to `Security`
+2. Click `+` (activate) next to `Two Factor Authentication`
+3. Select `Start setup`
+4. Input password if prompted
+5. Select `Authenticator App` to receive codes, then `Next`
+6. Click `Can't Scan the barcode?`
+7. Copy the 16 character key
+8. Create new secret `UNITY_2FA_KEY` and save the generated key from the previous step
+9. Scan the QR code in your Authenticator app and verify the code.
