@@ -8,6 +8,8 @@ const { Activator } = require('unity-activate/dist/activator');
 
 async function Run() {
     try {
+        await exec.exec('npm install puppeteer');
+
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {

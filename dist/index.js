@@ -44189,6 +44189,8 @@ const { Activator } = __nccwpck_require__(974);
 
 async function Run() {
     try {
+        await exec.exec('npm install puppeteer');
+
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {
