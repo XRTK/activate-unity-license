@@ -44190,6 +44190,14 @@ const { Activator } = __nccwpck_require__(974);
 async function Run() {
     try {
         await exec.exec('npm install puppeteer');
+        // Configure Puppeteer to use the installed Chromium
+        const browserFetcher = puppeteer.createBrowserFetcher({
+          path: path.join(__dirname, 'node_modules/puppeteer/.local-chromium'),
+        });
+        const revisionInfo = await browserFetcher.download('1108766');
+
+        // Set an environment variable to point Puppeteer to the downloaded Chromium
+        core.exportVariable('PUPPETEER_EXECUTABLE_PATH', revisionInfo.executablePath);
 
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
