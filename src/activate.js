@@ -15,7 +15,7 @@ async function Run() {
           path: path.join(__dirname, 'node_modules/puppeteer/.local-chromium'),
         });
         const revisionInfo = await browserFetcher.download('1108766');
-
+        console.log('Chromium downloaded to:', revisionInfo.executablePath);
         // Set an environment variable to point Puppeteer to the downloaded Chromium
         process.env.PUPPETEER_EXECUTABLE_PATH = revisionInfo.executablePath;
 
