@@ -44190,19 +44190,6 @@ const puppeteer = __nccwpck_require__(7174);
 
 async function Run() {
     try {
-        // Set an environment variable to skip Puppeteer's automatic Chromium download
-        process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true';
-        // Install Puppeteer (without downloading Chromium)
-        await exec.exec('npm install puppeteer --no-save');
-        // Configure Puppeteer to use the installed Chromium
-        const browserFetcher = puppeteer.createBrowserFetcher({
-          path: path.join(__dirname, 'node_modules/puppeteer/.local-chromium'),
-        });
-        const revisionInfo = await browserFetcher.download('1108766');
-        console.log('Chromium downloaded to:', revisionInfo.executablePath);
-        // Set an environment variable to point Puppeteer to the downloaded Chromium
-        process.env.PUPPETEER_EXECUTABLE_PATH = revisionInfo.executablePath;
-
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {
