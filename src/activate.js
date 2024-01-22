@@ -4,7 +4,7 @@ const io = require('@actions/io');
 const fs = require("fs");
 const path = require('path');
 const { readdir } = require('fs/promises');
-const { Activator } = require('unity-activate/dist/activator');
+const { Activator } = require('./unity-activator/activator');
 
 async function Run() {
     try {
