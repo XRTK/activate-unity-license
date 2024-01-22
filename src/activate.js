@@ -17,7 +17,7 @@ async function Run() {
         const revisionInfo = await browserFetcher.download('1108766');
 
         // Set an environment variable to point Puppeteer to the downloaded Chromium
-        core.exportVariable('PUPPETEER_EXECUTABLE_PATH', revisionInfo.executablePath);
+        process.env.PUPPETEER_EXECUTABLE_PATH = revisionInfo.executablePath;
 
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
