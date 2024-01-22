@@ -44186,6 +44186,7 @@ const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const { readdir } = __nccwpck_require__(3292);
 const { Activator } = __nccwpck_require__(974);
+const puppeteer = __nccwpck_require__(7174);
 
 async function Run() {
     try {

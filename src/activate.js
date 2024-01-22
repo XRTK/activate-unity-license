@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require('path');
 const { readdir } = require('fs/promises');
 const { Activator } = require('unity-activate/dist/activator');
+const puppeteer = require('puppeteer');
 
 async function Run() {
     try {
