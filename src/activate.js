@@ -8,7 +8,7 @@ const { Activator } = require('unity-activate/dist/activator');
 
 async function Run() {
     try {
-        await exec.exec('npm install puppeteer');
+        await exec.exec('npm i -g puppeteer');
         // Configure Puppeteer to use the installed Chromium
         const browserFetcher = puppeteer.createBrowserFetcher({
           path: path.join(__dirname, 'node_modules/puppeteer/.local-chromium'),
