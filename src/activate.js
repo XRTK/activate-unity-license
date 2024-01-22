@@ -9,7 +9,10 @@ const puppeteer = require('puppeteer');
 
 async function Run() {
     try {
-        await exec.exec('npm i -g puppeteer');
+        // Set an environment variable to skip Puppeteer's automatic Chromium download
+        process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true';
+        // Install Puppeteer (without downloading Chromium)
+        await exec.exec('npm install puppeteer --no-save');
         // Configure Puppeteer to use the installed Chromium
         const browserFetcher = puppeteer.createBrowserFetcher({
           path: path.join(__dirname, 'node_modules/puppeteer/.local-chromium'),
