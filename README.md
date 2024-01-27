@@ -64,7 +64,7 @@ jobs:
           build-targets: ${{ matrix.build-target }}
 
         # Activates the installation with the provided credentials
-      - uses: xrtk/activate-unity-license@v5
+      - uses: xrtk/activate-unity-license@v5.1
         with:
           # Required
           username: ${{ secrets.UNITY_USERNAME }}
@@ -72,7 +72,7 @@ jobs:
           # Optional
           license-type: 'Professional' # Chooses license type to use [ Personal, Professional ]
           serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
-          # auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
+          auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
 ```
 
 ### 2FA Auth Key Setup Steps
