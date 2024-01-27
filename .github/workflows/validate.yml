@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 env:
   UNITY_PROJECT_PATH: ''
@@ -48,7 +48,7 @@ jobs:
         # sets -> env.UNITY_EDITOR_PATH
         # sets -> env.UNITY_PROJECT_PATH
         # https://github.com/XRTK/unity-setup
-      - uses: xrtk/unity-setup@v7.2
+      - uses: xrtk/unity-setup@v7
         with:
           version-file-path: 'test-project/**/ProjectSettings/ProjectVersion.txt'
           build-targets: ${{ matrix.build-target }}
@@ -63,7 +63,7 @@ jobs:
           password: ${{ secrets.UNITY_PASSWORD }}
           # Optional
           license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
-          serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
+          # serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
           auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
 
       - name: Unity Build (${{ matrix.build-target }})
