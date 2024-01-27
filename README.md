@@ -59,7 +59,7 @@ jobs:
         # sets -> env.UNITY_EDITOR_PATH
         # sets -> env.UNITY_PROJECT_PATH
         # https://github.com/XRTK/unity-setup
-      - uses: xrtk/unity-setup@v7.2
+      - uses: xrtk/unity-setup@v7
         with:
           build-targets: ${{ matrix.build-target }}
 
