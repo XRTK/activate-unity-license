@@ -188,20 +188,23 @@ const hasExistingLicense = () => {
             '/Library/Unity/licenses'
         ],
         linux: [
-            '~/.local/share/unity3d/Unity/Unity_lic.ulf',
-            '~/.config/unity3d/Unity/licenses'
+            path.join(process.env.HOME, '.local/share/unity3d/Unity/Unity_lic.ulf'),
+            path.join(process.env.HOME, '.config/unity3d/Unity/licenses')
         ]
     };
 
     const platform = process.platform;
-    if (licensePaths[platform] == undefined) {
+    const paths = licensePaths[platform];
+
+    if (!paths) {
         return false;
     }
 
-    const [ulfPath, licensesDir] = licensePaths[platform];
+    const [ulfPath, licensesDir] = paths;
 
     try {
-        if (fs.existsSync(ulfPath)) {
+        if (ulfPath && fs.existsSync(ulfPath)) {
+            core.debug(`Found license file at path: ${ulfPath}`);
             return true;
         }
     } catch (err) {
@@ -209,7 +212,8 @@ const hasExistingLicense = () => {
     }
 
     try {
-        if (fs.existsSync(licensesDir)) {
+        if (licensesDir && fs.existsSync(licensesDir)) {
+            core.debug(`Found licenses directory: ${licensesDir}`);
             return fs.readdirSync(licensesDir).some(f => f.endsWith('.xml'));
         }
     } catch (err) {

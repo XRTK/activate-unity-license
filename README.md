@@ -64,7 +64,7 @@ jobs:
           build-targets: ${{ matrix.build-target }}
 
         # Activates the installation with the provided credentials
-      - uses: xrtk/activate-unity-license@v5.1
+      - uses: xrtk/activate-unity-license@v5
         with:
           # Required
           username: ${{ secrets.UNITY_USERNAME }}
