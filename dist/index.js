@@ -58588,35 +58588,45 @@ const findWorkspace = async (dir) => {
 };
 
 const hasExistingLicense = () => {
-    // serial based licenses
-    // - Windows: %PROGRAMDATA%\Unity\Unity_lic.ulf
-    // - macOS: /Library/Application\ Support / Unity / Unity_lic.ulf
-    // - Linux: ~/.local/share / unity3d / Unity / Unity_lic.ulf
-    // named license files
-    // - Windows: %LOCALAPPDATA%\Unity\licenses\UnityEntitlementLicense.xml
-    // - macOS: ~/Library/Unity/licenses/UnityEntitlementLicense.xml
-    // - Linux: ~/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml
-    // floating licenses
-    // - Windows: %LOCALAPPDATA%\Unity\licenses\<token-id>.xml
-    // - macOS: ~/Library/Unity/licenses/<token-id>.xml
-    // - Linux: ~/.config/unity3d/Unity/licenses/<token-id>.xml
-    // check for any of the above files
-    switch (process.platform) {
-        case 'win32':
-            var programDataPath = process.env.PROGRAMDATA;
-            var winLic = path.join(programDataPath, 'Unity', 'Unity_lic.ulf');
-            var localAppDataPath = process.env.LOCALAPPDATA;
-            return fs.existsSync(winLic) ||
-                fs.readdirSync(path.join(localAppDataPath, 'Unity', 'licenses')).some(f => f.endsWith('.xml'));
-        case 'darwin':
-            return fs.existsSync('/Library/Application Support/Unity/Unity_lic.ulf') ||
-                fs.readdirSync('/Library/Unity/licenses/').some(f => f.endsWith('.xml'));
-        case 'linux':
-            return fs.existsSync('~/.local/share/unity3d/Unity/Unity_lic.ulf') ||
-                fs.readdirSync('~/.config/unity3d/Unity/licenses/').some(f => f.endsWith('.xml'));
-        default:
-            return false;
+    const licensePaths = {
+        win32: [
+            path.join(process.env.PROGRAMDATA, 'Unity', 'Unity_lic.ulf'),
+            path.join(process.env.LOCALAPPDATA, 'Unity', 'licenses')
+        ],
+        darwin: [
+            '/Library/Application Support/Unity/Unity_lic.ulf',
+            '/Library/Unity/licenses'
+        ],
+        linux: [
+            '~/.local/share/unity3d/Unity/Unity_lic.ulf',
+            '~/.config/unity3d/Unity/licenses'
+        ]
+    };
+
+    const platform = process.platform;
+    if (licensePaths[platform] == undefined) {
+        return false;
     }
+
+    const [ulfPath, licensesDir] = licensePaths[platform];
+
+    try {
+        if (fs.existsSync(ulfPath)) {
+            return true;
+        }
+    } catch (err) {
+        core.debug(`Error checking ulf path: ${err.message}`);
+    }
+
+    try {
+        if (fs.existsSync(licensesDir)) {
+            return fs.readdirSync(licensesDir).some(f => f.endsWith('.xml'));
+        }
+    } catch (err) {
+        core.debug(`Error checking licenses directory: ${err.message}`);
+    }
+
+    return false;
 };
 
 module.exports = { Run }
