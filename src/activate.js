@@ -8,6 +8,11 @@ const { Activator } = require('./unity-activator/activator');
 
 async function Run() {
     try {
+        if (hasExistingLicense()) {
+            core.info('Unity License already activated!');
+            return;
+        }
+
         var editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {
@@ -170,6 +175,38 @@ const findWorkspace = async (dir) => {
 
     const result = await findWorkspace(path.resolve(dir, '..'));
     return result;
+};
+
+const hasExistingLicense = () => {
+    // serial based licenses
+    // - Windows: %PROGRAMDATA%\Unity\Unity_lic.ulf
+    // - macOS: /Library/Application\ Support / Unity / Unity_lic.ulf
+    // - Linux: ~/.local/share / unity3d / Unity / Unity_lic.ulf
+    // named license files
+    // - Windows: %LOCALAPPDATA%\Unity\licenses\UnityEntitlementLicense.xml
+    // - macOS: ~/Library/Unity/licenses/UnityEntitlementLicense.xml
+    // - Linux: ~/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml
+    // floating licenses
+    // - Windows: %LOCALAPPDATA%\Unity\licenses\<token-id>.xml
+    // - macOS: ~/Library/Unity/licenses/<token-id>.xml
+    // - Linux: ~/.config/unity3d/Unity/licenses/<token-id>.xml
+    // check for any of the above files
+    switch (process.platform) {
+        case 'win32':
+            var programDataPath = process.env.PROGRAMDATA;
+            var winLic = path.join(programDataPath, 'Unity', 'Unity_lic.ulf');
+            var localAppDataPath = process.env.LOCALAPPDATA;
+            return fs.existsSync(winLic) ||
+                fs.readdirSync(path.join(localAppDataPath, 'Unity', 'licenses')).some(f => f.endsWith('.xml'));
+        case 'darwin':
+            return fs.existsSync('/Library/Application Support/Unity/Unity_lic.ulf') ||
+                fs.readdirSync('/Library/Unity/licenses/').some(f => f.endsWith('.xml'));
+        case 'linux':
+            return fs.existsSync('~/.local/share/unity3d/Unity/Unity_lic.ulf') ||
+                fs.readdirSync('~/.config/unity3d/Unity/licenses/').some(f => f.endsWith('.xml'));
+        default:
+            return false;
+    }
 };
 
 module.exports = { Run }
