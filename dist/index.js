@@ -58594,8 +58594,8 @@ const hasExistingLicense = () => {
             path.join(process.env.LOCALAPPDATA, 'Unity', 'licenses')
         ],
         darwin: [
-            '/Library/Application Support/Unity/Unity_lic.ulf',
-            '/Library/Unity/licenses'
+            path.join('/Library', 'Application Support', 'Unity', 'Unity_lic.ulf'),
+            path.join('/Library', 'Unity', 'licenses')
         ],
         linux: [
             path.join(process.env.HOME, '.local/share/unity3d/Unity/Unity_lic.ulf'),
@@ -58604,30 +58604,36 @@ const hasExistingLicense = () => {
     };
 
     const platform = process.platform;
+    core.info(`Platform: ${platform}`);
     const paths = licensePaths[platform];
 
     if (!paths) {
+        core.error(`No license paths configured for platform: ${platform}`);
         return false;
     }
 
     const [ulfPath, licensesDir] = paths;
+    core.info(`ULF Path: ${ulfPath}`);
+    core.info(`Licenses Directory: ${licensesDir}`);
 
     try {
         if (ulfPath && fs.existsSync(ulfPath)) {
-            core.debug(`Found license file at path: ${ulfPath}`);
+            core.info(`Found license file at path: ${ulfPath}`);
             return true;
         }
     } catch (err) {
-        core.debug(`Error checking ulf path: ${err.message}`);
+        core.error(`Error checking ulf path: ${err.message}`);
     }
 
     try {
         if (licensesDir && fs.existsSync(licensesDir)) {
-            core.debug(`Found licenses directory: ${licensesDir}`);
+            core.info(`Found licenses directory: ${licensesDir}`);
             return fs.readdirSync(licensesDir).some(f => f.endsWith('.xml'));
+        } else {
+            core.info(`Licenses directory does not exist: ${licensesDir}`);
         }
     } catch (err) {
-        core.debug(`Error checking licenses directory: ${err.message}`);
+        core.error(`Error checking licenses directory: ${err.message}`);
     }
 
     return false;
