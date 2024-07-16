@@ -58425,6 +58425,7 @@ async function retry(fn, retries = 3) {
         } catch (error) {
             lastError = error;
             core.warning(`Attempt ${i + 1} failed: ${error.message}`);
+            await new Promise(r => setTimeout(r, 2000 * i));
         }
     }
     throw lastError;
