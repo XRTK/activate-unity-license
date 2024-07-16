@@ -58421,6 +58421,8 @@ async function Run() {
         if (hasExistingLicense()) {
             core.info('Unity License already activated!');
             return;
+        } else {
+            core.info('Attempting to activate Unity License...');
         }
 
         var editorPath = process.env.UNITY_EDITOR_PATH;
