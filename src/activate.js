@@ -122,16 +122,16 @@ async function Run() {
                 core.endGroup();
 
                 files = await findByExtension(exeDir, '.ulf');
-                var ulfPath = files[0];
+                var ulfDir = files[0];
 
-                core.debug(`ulf file: "${ulfPath}"`);
+                core.debug(`ulf file: "${ulfDir}"`);
 
-                if (!ulfPath) {
+                if (!ulfDir) {
                     throw Error(`Failed to find manual license ulf file!`);
                 }
 
                 core.startGroup(`Activate Unity Personal License`);
-                args = `-quit -manualLicenseFile ""${ulfPath}""`;
+                args = `-quit -manualLicenseFile ""${ulfDir}""`;
 
                 try {
                     exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
@@ -141,7 +141,7 @@ async function Run() {
 
                 // cleanup
                 fs.unlink(alfPath, () => core.debug(`removed: ${alfPath}`));
-                fs.unlink(ulfPath, () => core.debug(`removed: ${ulfPath}`));
+                fs.unlink(ulfDir, () => core.debug(`removed: ${ulfDir}`));
 
                 core.endGroup();
             } else {
@@ -203,16 +203,16 @@ const hasExistingLicense = () => {
 
     const licensePaths = {
         win32: [
-            path.resolve(process.env.PROGRAMDATA || '', 'Unity', 'Unity_lic.ulf'),
-            path.resolve(process.env.LOCALAPPDATA || '', 'Unity', 'licenses')
+            path.resolve(process.env.PROGRAMDATA, 'Unity'),
+            path.resolve(process.env.LOCALAPPDATA, 'Unity', 'licenses')
         ],
         darwin: [
-            path.resolve('/Library', 'Application Support', 'Unity', 'Unity_lic.ulf'),
+            path.resolve('/Library', 'Application Support', 'Unity'),
             path.resolve('/Library', 'Unity', 'licenses')
         ],
         linux: [
-            path.resolve(process.env.HOME || '', '.local/share/unity3d/Unity/Unity_lic.ulf'),
-            path.resolve(process.env.HOME || '', '.config/unity3d/Unity/licenses')
+            path.resolve(process.env.HOME, '.local/share/unity3d/Unity'),
+            path.resolve(process.env.HOME, '.config/unity3d/Unity/licenses')
         ]
     };
 
@@ -225,12 +225,21 @@ const hasExistingLicense = () => {
         return false;
     }
 
-    const [ulfPath, licensesDir] = paths;
+    const [ulfDir, licensesDir] = paths;
+
+    // if ulf directory doesn't exist, create it and give it permissions
+    if (platform === 'darwin' && !fs.existsSync(ulfDir)) {
+        core.debug(`Creating Unity license directory: ${ulfDir}`);
+        fs.mkdirSync(ulfDir, { recursive: true });
+        fs.chmodSync(ulfDir, 0o777);
+    }
+
+    const ulfPath = path.resolve(ulfDir, 'Unity_lic.ulf');
     core.debug(`ULF Path: ${ulfPath}`);
     core.debug(`Licenses Directory: ${licensesDir}`);
 
     try {
-        if (ulfPath && fs.existsSync(ulfPath)) {
+        if (ulfDir && ulfPath && fs.existsSync(ulfPath)) {
             core.debug(`Found license file at path: ${ulfPath}`);
             return true;
         }
