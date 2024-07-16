@@ -51,14 +51,14 @@ async function Run() {
             var maskedSerial = serial.slice(0, -4) + `XXXX`;
             core.setSecret(maskedSerial);
             core.startGroup(`Activate Unity Professional License`);
-            var args = `-quit -nographics -batchmode -serial ${serial} -username ${username} -password ${password}`;
+            var args = `-quit -batchmode -serial ${serial} -username ${username} -password ${password}`;
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
             core.startGroup(`Generate Unity License Request File`);
             var exitCode = 0;
-            var args = `-quit -nographics -batchmode -createManualActivationFile`;
+            var args = `-quit -batchmode -createManualActivationFile`;
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
             } catch (error) {
@@ -89,10 +89,10 @@ async function Run() {
                 serial: '',
                 out: exeDir,
             })
-            .run()
-            .catch(e => {
-                core.error(e.message);
-            });
+                .run()
+                .catch(e => {
+                    core.error(e.message);
+                });
 
             core.endGroup();
 
@@ -106,7 +106,7 @@ async function Run() {
             }
 
             core.startGroup(`Activate Unity Personal License`);
-            args = `-quit -nographics -batchmode -manualLicenseFile ""${ulfPath}""`;
+            args = `-quit -batchmode -manualLicenseFile ""${ulfPath}""`;
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
@@ -145,7 +145,7 @@ const findByExtension = async (dir, ext) => {
     }
 
     if (matchedFiles.length == 0) {
-        for(const subDir of directories) {
+        for (const subDir of directories) {
             const nestedMatches = await findByExtension(subDir, ext);
 
             for (const nestedMatch of nestedMatches) {
