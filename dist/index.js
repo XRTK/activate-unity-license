@@ -58617,8 +58617,8 @@ const hasExistingLicense = () => {
             path.resolve(process.env.LOCALAPPDATA, 'Unity', 'licenses')
         ],
         darwin: [
-            path.resolve('/Library', 'Application Support', 'Unity'),
-            path.resolve('/Library', 'Unity', 'licenses')
+            '/Library/Application Support/Unity',
+            '/Library/Unity/licenses'
         ],
         linux: [
             path.resolve(process.env.HOME, '.local/share/unity3d/Unity'),
@@ -58636,14 +58636,25 @@ const hasExistingLicense = () => {
 
     const [ulfDir, licensesDir] = paths;
 
-    // if ulf directory doesn't exist, create it and give it permissions
-    if (platform === 'darwin' && (ulfDir === undefined || !fs.existsSync(ulfDir))) {
-        core.debug(`Creating Unity license directory: ${ulfDir}`);
-        fs.mkdirSync(ulfDir, { recursive: true });
-        fs.chmodSync(ulfDir, 0o777);
+    switch (platform) {
+        case 'win32':
+            break;
+        case 'darwin':
+            // if ulf directory doesn't exist, create it and give it permissions
+            if (!fs.existsSync(ulfDir)) {
+                core.debug(`Creating Unity license directory: ${ulfDir}`);
+                fs.mkdirSync(ulfDir, { recursive: true });
+                fs.chmodSync(ulfDir, 0o777);
+            }
+            break;
+        case 'linux':
+            break;
     }
 
     const ulfPath = path.resolve(ulfDir, 'Unity_lic.ulf');
+
+    core.debug(`Platform: ${platform}`);
+    core.debug(`ULF Directory: ${ulfDir}`);
     core.debug(`ULF Path: ${ulfPath}`);
     core.debug(`Licenses Directory: ${licensesDir}`);
 
