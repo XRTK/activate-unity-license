@@ -58,14 +58,14 @@ async function Run() {
             var maskedSerial = serial.slice(0, -4) + `XXXX`;
             core.setSecret(maskedSerial);
             core.startGroup(`Activate Unity Professional License`);
-            var args = `-quit -batchmode -serial ${serial} -username ${username} -password ${password}`;
+            var args = `-quit -serial ${serial} -username ${username} -password ${password}`;
             var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
             core.endGroup();
         } else if (licenseType.toLowerCase().startsWith('per')) {
             // if personal license activate by using requesting activation file
             core.startGroup(`Generate Unity License Request File`);
             var exitCode = 0;
-            var args = `-quit -batchmode -createManualActivationFile`;
+            var args = `-quit -createManualActivationFile`;
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
             } catch (error) {
@@ -113,7 +113,7 @@ async function Run() {
             }
 
             core.startGroup(`Activate Unity Personal License`);
-            args = `-quit -batchmode -manualLicenseFile ""${ulfPath}""`;
+            args = `-quit -manualLicenseFile ""${ulfPath}""`;
 
             try {
                 exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
@@ -180,52 +180,54 @@ const findWorkspace = async (dir) => {
 };
 
 const hasExistingLicense = () => {
+    core.debug('Checking for existing Unity License activation...');
+
     const licensePaths = {
         win32: [
-            path.join(process.env.PROGRAMDATA, 'Unity', 'Unity_lic.ulf'),
-            path.join(process.env.LOCALAPPDATA, 'Unity', 'licenses')
+            path.resolve(process.env.PROGRAMDATA || '', 'Unity', 'Unity_lic.ulf'),
+            path.resolve(process.env.LOCALAPPDATA || '', 'Unity', 'licenses')
         ],
         darwin: [
-            path.join('/Library', 'Application Support', 'Unity', 'Unity_lic.ulf'),
-            path.join('/Library', 'Unity', 'licenses')
+            path.resolve('/Library', 'Application Support', 'Unity', 'Unity_lic.ulf'),
+            path.resolve('/Library', 'Unity', 'licenses')
         ],
         linux: [
-            path.join(process.env.HOME, '.local/share/unity3d/Unity/Unity_lic.ulf'),
-            path.join(process.env.HOME, '.config/unity3d/Unity/licenses')
+            path.resolve(process.env.HOME || '', '.local/share/unity3d/Unity/Unity_lic.ulf'),
+            path.resolve(process.env.HOME || '', '.config/unity3d/Unity/licenses')
         ]
     };
 
     const platform = process.platform;
-    core.info(`Platform: ${platform}`);
+    core.debug(`Platform: ${platform}`);
     const paths = licensePaths[platform];
 
     if (!paths) {
-        core.error(`No license paths configured for platform: ${platform}`);
+        core.debug(`No license paths configured for platform: ${platform}`);
         return false;
     }
 
     const [ulfPath, licensesDir] = paths;
-    core.info(`ULF Path: ${ulfPath}`);
-    core.info(`Licenses Directory: ${licensesDir}`);
+    core.debug(`ULF Path: ${ulfPath}`);
+    core.debug(`Licenses Directory: ${licensesDir}`);
 
     try {
         if (ulfPath && fs.existsSync(ulfPath)) {
-            core.info(`Found license file at path: ${ulfPath}`);
+            core.debug(`Found license file at path: ${ulfPath}`);
             return true;
         }
     } catch (err) {
-        core.error(`Error checking ulf path: ${err.message}`);
+        core.debug(`Error checking ulf path: ${err.message}`);
     }
 
     try {
         if (licensesDir && fs.existsSync(licensesDir)) {
-            core.info(`Found licenses directory: ${licensesDir}`);
+            core.debug(`Found licenses directory: ${licensesDir}`);
             return fs.readdirSync(licensesDir).some(f => f.endsWith('.xml'));
         } else {
-            core.info(`Licenses directory does not exist: ${licensesDir}`);
+            core.debug(`Licenses directory does not exist: ${licensesDir}`);
         }
     } catch (err) {
-        core.error(`Error checking licenses directory: ${err.message}`);
+        core.debug(`Error checking licenses directory: ${err.message}`);
     }
 
     return false;

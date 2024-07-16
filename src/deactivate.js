@@ -37,8 +37,8 @@ async function Run() {
 
             var pwsh = await io.which("pwsh", true);
             var unity_action = path.resolve(__dirname, 'unity-action.ps1');
-            // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
-            var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
+            // -quit -returnlicense -username name@example.com -password XXXXXXXXXXXXX
+            var args = `-quit -returnlicense -username ${username} -password ${password}`;
             var exitCode = 0;
 
             try {
