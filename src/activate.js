@@ -203,53 +203,56 @@ const hasExistingLicense = () => {
 
     const licensePaths = {
         win32: [
-            path.resolve(process.env.PROGRAMDATA, 'Unity'),
-            path.resolve(process.env.LOCALAPPDATA, 'Unity', 'licenses')
+            path.resolve(process.env.PROGRAMDATA || '', 'Unity'),
+            path.resolve(process.env.LOCALAPPDATA || '', 'Unity', 'licenses')
         ],
         darwin: [
-            '/Library/Application Support/Unity',
-            '/Library/Unity/licenses'
+            path.resolve('/Library', 'Application Support', 'Unity') || '/Library/Application Support/Unity',
+            path.resolve('/Library', 'Unity', 'licenses' || '/Library/Unity/licenses')
         ],
         linux: [
-            path.resolve(process.env.HOME, '.local/share/unity3d/Unity'),
-            path.resolve(process.env.HOME, '.config/unity3d/Unity/licenses')
+            path.resolve(process.env.HOME || '', '.local/share/unity3d/Unity'),
+            path.resolve(process.env.HOME || '', '.config/unity3d/Unity/licenses')
         ]
     };
 
     const platform = process.platform;
+    core.debug(`Platform detected: ${platform}`);
+
     const paths = licensePaths[platform];
 
-    if (!paths) {
+    if (!paths || paths.length < 2) {
         core.debug(`No license paths configured for platform: ${platform}`);
         return false;
     }
 
-    const [ulfDir, licensesDir] = paths;
+    const [ulfDir, licensesDir] = paths.filter(Boolean);
 
-    switch (platform) {
-        case 'win32':
-            break;
-        case 'darwin':
-            // if ulf directory doesn't exist, create it and give it permissions
-            if (!fs.existsSync(ulfDir)) {
-                core.debug(`Creating Unity license directory: ${ulfDir}`);
-                fs.mkdirSync(ulfDir, { recursive: true });
-                fs.chmodSync(ulfDir, 0o777);
-            }
-            break;
-        case 'linux':
-            break;
+    if (!ulfDir) {
+        core.debug(`ULF Directory is not defined for ${platform}`);
+        return false;
+    }
+
+    if (!licensesDir) {
+        core.debug(`Licenses Directory is not defined for ${platform}`);
+        return false;
+    }
+
+    core.debug(`ULF Directory: ${ulfDir}`);
+    core.debug(`Licenses Directory: ${licensesDir}`);
+
+    // if ulf directory doesn't exist, create it and give it permissions
+    if (platform === 'darwin' && !fs.existsSync(ulfDir)) {
+        core.debug(`Creating Unity license directory: ${ulfDir}`);
+        fs.mkdirSync(ulfDir, { recursive: true });
+        fs.chmodSync(ulfDir, 0o777);
     }
 
     const ulfPath = path.resolve(ulfDir, 'Unity_lic.ulf');
-
-    core.debug(`Platform: ${platform}`);
-    core.debug(`ULF Directory: ${ulfDir}`);
     core.debug(`ULF Path: ${ulfPath}`);
-    core.debug(`Licenses Directory: ${licensesDir}`);
 
     try {
-        if (ulfDir && ulfPath && fs.existsSync(ulfPath)) {
+        if (fs.existsSync(ulfPath)) {
             core.debug(`Found license file at path: ${ulfPath}`);
             return true;
         }
@@ -258,7 +261,7 @@ const hasExistingLicense = () => {
     }
 
     try {
-        if (licensesDir && fs.existsSync(licensesDir)) {
+        if (fs.existsSync(licensesDir)) {
             core.debug(`Found licenses directory: ${licensesDir}`);
             return fs.readdirSync(licensesDir).some(f => f.endsWith('.xml'));
         } else {
