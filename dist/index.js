@@ -58469,22 +58469,25 @@ async function Run() {
         var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
         var licenseType = core.getInput('license-type');
 
+        // if pro check serial input
+        if (licenseType.toLowerCase().startsWith('pro')) {
+            // if pro/plus license activate by using UNITY_SERIAL env variable
+            var serial = core.getInput('serial');
+
+            if (!serial) {
+                throw Error('Missing serial input');
+            }
+        }
+
         await retry(async () => {
             if (licenseType.toLowerCase().startsWith('pro')) {
-                // if pro/plus license activate by using UNITY_SERIAL env variable
-                var serial = core.getInput('serial');
-
-                if (!serial) {
-                    throw Error('Missing serial input');
-                }
-
                 // Unity only likes to mask the last 4 characters of serial.
                 // Let's mask all of it.
                 var maskedSerial = serial.slice(0, -4) + `XXXX`;
                 core.setSecret(maskedSerial);
                 core.startGroup(`Activate Unity Professional License`);
                 var args = `-quit -serial ${serial} -username ${username} -password ${password}`;
-                var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
+                var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
                 core.endGroup();
             } else if (licenseType.toLowerCase().startsWith('per')) {
                 // if personal license activate by using requesting activation file
@@ -58492,7 +58495,7 @@ async function Run() {
                 var exitCode = 0;
                 var args = `-quit -createManualActivationFile`;
                 try {
-                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
+                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
                 } catch (error) {
                     //console.error(error.message);
                 }
@@ -58540,7 +58543,7 @@ async function Run() {
                 args = `-quit -manualLicenseFile ""${ulfPath}""`;
 
                 try {
-                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
+                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
                 } catch (error) {
                     //console.error(error.message);
                 }
