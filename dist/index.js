@@ -58639,6 +58639,7 @@ const hasExistingLicense = () => {
 
     // if ulf directory doesn't exist, create it and give it permissions
     if (platform === 'darwin' && !fs.existsSync(ulfDir)) {
+        core.debug(`Creating Unity license directory: ${ulfDir}`);
         fs.mkdirSync(ulfDir, { recursive: true });
         fs.chmodSync(ulfDir, 0o777);
     }
