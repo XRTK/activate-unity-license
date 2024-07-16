@@ -58627,7 +58627,6 @@ const hasExistingLicense = () => {
     };
 
     const platform = process.platform;
-    core.debug(`Platform: ${platform}`);
     const paths = licensePaths[platform];
 
     if (!paths) {
@@ -58638,7 +58637,7 @@ const hasExistingLicense = () => {
     const [ulfDir, licensesDir] = paths;
 
     // if ulf directory doesn't exist, create it and give it permissions
-    if (platform === 'darwin' && !fs.existsSync(ulfDir)) {
+    if (platform === 'darwin' && (ulfDir === undefined || !fs.existsSync(ulfDir))) {
         core.debug(`Creating Unity license directory: ${ulfDir}`);
         fs.mkdirSync(ulfDir, { recursive: true });
         fs.chmodSync(ulfDir, 0o777);
