@@ -58488,7 +58488,7 @@ async function Run() {
                 core.setSecret(maskedSerial);
                 core.startGroup(`Activate Unity Professional License`);
                 var args = `-quit -serial ${serial} -username ${username} -password ${password}`;
-                var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
+                var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
                 core.endGroup();
             } else if (licenseType.toLowerCase().startsWith('per')) {
                 // if personal license activate by using requesting activation file
@@ -58496,7 +58496,7 @@ async function Run() {
                 var exitCode = 0;
                 var args = `-quit -createManualActivationFile`;
                 try {
-                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
+                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
                 } catch (error) {
                     //console.error(error.message);
                 }
@@ -58544,7 +58544,7 @@ async function Run() {
                 args = `-quit -manualLicenseFile ""${ulfDir}""`;
 
                 try {
-                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
+                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
                 } catch (error) {
                     //console.error(error.message);
                 }
@@ -58628,8 +58628,8 @@ const hasExistingLicense = () => {
 
     const platform = process.platform;
     core.debug(`Platform detected: ${platform}`);
-
     const paths = licensePaths[platform];
+    core.debug(`License paths: ${paths}`);
 
     if (!paths || paths.length < 2) {
         core.debug(`No license paths configured for platform: ${platform}`);
