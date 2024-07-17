@@ -209,8 +209,7 @@ const getLicensingClient = () => {
     // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
     // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
-    const editorPath = process.env.UNITY_EDITOR_PATH;
-    // parse version string from editor path
+    const editorPath = path.resolve(process.env.UNITY_EDITOR_PATH, '..');
     const version = editorPath.match(/(\d+\.\d+\.\d+[a-z]?\d?)/)[0];
     core.debug(`Unity Editor Path: ${editorPath}`);
     core.debug(`Unity Version: ${version}`);
