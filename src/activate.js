@@ -83,19 +83,21 @@ async function Run() {
                 core.setSecret(maskedSerial);
                 core.startGroup(`Activate Unity Professional License`);
                 var args = `-quit -batchmode -nographics -serial ${serial} -username ${username} -password ${password}`;
-                var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
-                core.endGroup();
+                try {
+                    await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
+                } finally {
+                    core.endGroup();
+                }
             } else if (licenseType.toLowerCase().startsWith('per')) {
                 // if personal license activate by using requesting activation file
                 core.startGroup(`Generate Unity License Request File`);
-                var exitCode = 0;
                 var args = `-quit -batchmode -nographics -createManualActivationFile`;
+
                 try {
-                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
-                } catch (error) {
-                    //console.error(error.message);
+                    await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
+                } finally {
+                    core.endGroup();
                 }
-                core.endGroup();
 
                 var exeDir = path.resolve(process.cwd());
                 core.debug(`exeDir: ${exeDir}`);
@@ -139,16 +141,13 @@ async function Run() {
                 args = `-quit -batchmode -nographics -manualLicenseFile ""${ulfDir}""`;
 
                 try {
-                    exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
-                } catch (error) {
-                    //console.error(error.message);
+                    await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
+                } finally {
+                    // cleanup
+                    fs.unlink(alfPath, () => core.debug(`removed: ${alfPath}`));
+                    fs.unlink(ulfDir, () => core.debug(`removed: ${ulfDir}`));
+                    core.endGroup();
                 }
-
-                // cleanup
-                fs.unlink(alfPath, () => core.debug(`removed: ${alfPath}`));
-                fs.unlink(ulfDir, () => core.debug(`removed: ${ulfDir}`));
-
-                core.endGroup();
             } else {
                 core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`);
             }
