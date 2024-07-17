@@ -58628,6 +58628,10 @@ const getLicensingClient = () => {
     core.debug(`Unity Editor Path: ${editorPath}`);
     core.debug(`Unity Version: ${version}`);
 
+    if (!fs.existsSync(editorPath)) {
+        throw Error(`Unity Editor not found at path: ${editorPath}`);
+    }
+
     var licenseClientPath;
 
     switch (platform) {
