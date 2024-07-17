@@ -58622,18 +58622,18 @@ const getLicensingClient = () => {
     var editorPath = process.env.UNITY_EDITOR_PATH;
     switch (platform) {
         case 'win32':
-            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client');
+            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client', "Unity.Licensing.Client.exe");
         case 'darwin':
             const version = process.env.UNITY_VERSION;
             const [major, minor, patch] = version.split('.');
             const isOlderThan2021_3_19 = major < 2021 || (major == 2021 && minor < 3) || (major == 2021 && minor == 3 && patch < 19);
             if (isOlderThan2021_3_19) {
-                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'Resources');
+                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'Resources', 'Unity.Licensing.Client');
             } else {
-                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'MacOS');
+                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'MacOS', 'Unity.Licensing.Client');
             }
         case 'linux':
-            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client');
+            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client', "Unity.Licensing.Client");
         default:
             throw Error(`Unsupported platform: ${platform}`);
     }
