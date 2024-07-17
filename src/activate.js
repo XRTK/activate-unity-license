@@ -152,6 +152,11 @@ async function Run() {
                 core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`);
             }
         }, 3);
+        await new Promise(r => setTimeout(r, 3000));
+
+        if (!hasExistingLicense()) {
+            throw Error('Unity License Activation Failed!');
+        }
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
