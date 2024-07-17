@@ -58415,6 +58415,7 @@ const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const { readdir } = __nccwpck_require__(3292);
 const { Activator } = __nccwpck_require__(3702);
+const platform = process.platform;
 
 async function retry(fn, retries = 3) {
     let lastError;
@@ -58465,6 +58466,10 @@ async function Run() {
         }
 
         var authKey = core.getInput('auth-key');
+
+        var licenseClient = getLicensingClient();
+        core.debug(`Unity Licensing Client Path: ${licenseClient}`);
+        await exec.exec(`${licenseClient} --version`);
 
         var pwsh = await io.which("pwsh", true);
         var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
@@ -58609,6 +58614,31 @@ const findWorkspace = async (dir) => {
     return result;
 };
 
+const getLicensingClient = () => {
+    // Windows: <UnityEditorDir>\Data\Resources\Licensing\Client
+    // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
+    // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
+    // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
+    var editorPath = process.env.UNITY_EDITOR_PATH;
+    switch (platform) {
+        case 'win32':
+            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client');
+        case 'darwin':
+            const version = process.env.UNITY_VERSION;
+            const [major, minor, patch] = version.split('.');
+            const isOlderThan2021_3_19 = major < 2021 || (major == 2021 && minor < 3) || (major == 2021 && minor == 3 && patch < 19);
+            if (isOlderThan2021_3_19) {
+                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'Resources');
+            } else {
+                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'MacOS');
+            }
+        case 'linux':
+            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client');
+        default:
+            throw Error(`Unsupported platform: ${platform}`);
+    }
+};
+
 const hasExistingLicense = () => {
     core.debug('Checking for existing Unity License activation...');
 
@@ -58627,7 +58657,6 @@ const hasExistingLicense = () => {
         ]
     };
 
-    const platform = process.platform;
     core.debug(`Platform detected: ${platform}`);
     const paths = licensePaths[platform];
     core.debug(`License paths: ${paths}`);
@@ -58666,6 +58695,8 @@ const hasExistingLicense = () => {
         if (fs.existsSync(ulfPath)) {
             core.debug(`Found license file at path: ${ulfPath}`);
             return true;
+        } else {
+            core.debug(`License file does not exist at path: ${ulfPath}`);
         }
     } catch (err) {
         core.debug(`Error checking ulf path: ${err.message}`);
@@ -58692,12 +58723,12 @@ const GetLogs = () => {
         linux: path.resolve(process.env.HOME || '', '.config', 'unity3d', 'Unity', 'Unity.Licensing.Client.log')
     };
 
-    core.debug(`Unity Licensing Client Log: ${licenseLogs[process.platform]}`);
+    core.debug(`Unity Licensing Client Log: ${licenseLogs[platform]}`);
 
-    if (fs.existsSync(licenseLogs[process.platform])) {
-        copyFileToWorkspace(licenseLogs[process.platform], 'Unity.Licensing.Client.log');
+    if (fs.existsSync(licenseLogs[platform])) {
+        copyFileToWorkspace(licenseLogs[platform], 'Unity.Licensing.Client.log');
     } else {
-        core.warning(`Unity Licensing Client Log: ${licenseLogs[process.platform]} not found!`);
+        core.warning(`Unity Licensing Client Log: ${licenseLogs[platform]} not found!`);
     }
 
     const hubLogs = {
@@ -58706,12 +58737,12 @@ const GetLogs = () => {
         linux: path.resolve(process.env.HOME || '', '.config', 'UnityHub', 'logs', 'info-log.json')
     };
 
-    core.debug(`Unity Hub Log: ${hubLogs[process.platform]}`);
+    core.debug(`Unity Hub Log: ${hubLogs[platform]}`);
 
-    if (fs.existsSync(hubLogs[process.platform])) {
-        copyFileToWorkspace(hubLogs[process.platform], 'UnityHub.log');
+    if (fs.existsSync(hubLogs[platform])) {
+        copyFileToWorkspace(hubLogs[platform], 'UnityHub.log');
     } else {
-        core.warning(`Unity Hub Log: ${hubLogs[process.platform]} not found!`);
+        core.warning(`Unity Hub Log: ${hubLogs[platform]} not found!`);
     }
 };
 
@@ -58722,6 +58753,7 @@ const copyFileToWorkspace = (filePath, fileName) => {
 };
 
 module.exports = { Run };
+
 
 /***/ }),
 
