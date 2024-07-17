@@ -159,6 +159,8 @@ async function Run() {
         if (!hasExistingLicense()) {
             throw Error('Unable to find Unity License!');
         }
+
+        await exec.exec(`"${licenseClient}" --showEntitlements`);
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
