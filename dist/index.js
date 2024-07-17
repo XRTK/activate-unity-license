@@ -58646,6 +58646,11 @@ const getLicensingClient = () => {
     }
 
     core.debug(`Unity Licensing Client Path: ${licenseClientPath}`);
+
+    if (!fs.existsSync(licenseClientPath)) {
+        throw Error(`Unity Licensing Client not found at path: ${licenseClientPath}`);
+    }
+
     return licenseClientPath;
 };
 
