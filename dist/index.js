@@ -58686,10 +58686,6 @@ const hasExistingLicense = () => {
 };
 
 const PrintLogs = () => {
-    // print Unity Hub and Unity.Licensing.Client logs
-    // Window: C: \users\<yourusername>\AppData\Local\Unity\Unity.Licensing.Client.log
-    // Mac: ~/Library/Logs/Unity/Unity.Licensing.Client.log
-    // Linux: ~/.config/unity3d/Unity/Unity.Licensing.Client.log
     const licenseLogs = {
         win32: path.resolve(process.env.APPDATA || '', 'Unity', 'Unity.Licensing.Client.log'),
         darwin: path.resolve(process.env.HOME || '', 'Library', 'Logs', 'Unity', 'Unity.Licensing.Client.log'),
@@ -58697,16 +58693,12 @@ const PrintLogs = () => {
     };
 
     if (fs.existsSync(licenseLogs[process.platform])) {
-        const logContent = fs.readFileSync(licenseLogs[process.platform], 'utf8');
-        core.debug(`Unity Licensing Client Log: ${licenseLogs[process.platform]}\n${logContent}`);
+        core.debug(`Unity Licensing Client Log: ${licenseLogs[process.platform]}`);
+        copyFileToWorkspace(licenseLogs[process.platform], 'Unity.Licensing.Client.log');
     } else {
         core.warning(`Unity Licensing Client Log: ${licenseLogs[process.platform]} not found!`);
     }
 
-    // The Hub log file (info-log.json):
-    // Windows: C: \users\<yourusername>\AppData\Roaming\UnityHub\logs
-    // Mac: ~/Library/Application Support/UnityHub/logs
-    // Linux: ~/.config/UnityHub/logs
     const hubLogs = {
         win32: path.resolve(process.env.APPDATA || '', 'UnityHub', 'logs', 'info-log.json'),
         darwin: path.resolve(process.env.HOME || '', 'Library', 'Application Support', 'UnityHub', 'logs', 'info-log.json'),
@@ -58714,11 +58706,17 @@ const PrintLogs = () => {
     };
 
     if (fs.existsSync(hubLogs[process.platform])) {
-        const logContent = fs.readFileSync(hubLogs[process.platform], 'utf8');
-        core.debug(`Unity Hub Log: ${hubLogs[process.platform]}\n${logContent}`);
+        core.debug(`Unity Hub Log: ${hubLogs[process.platform]}`);
+        copyFileToWorkspace(hubLogs[process.platform], 'UnityHub.log');
     } else {
         core.warning(`Unity Hub Log: ${hubLogs[process.platform]} not found!`);
     }
+};
+
+const copyFileToWorkspace = (filePath, fileName) => {
+    const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
+    const logPath = path.resolve(workspace, fileName);
+    fs.copyFileSync(filePath, logPath);
 };
 
 module.exports = { Run };
