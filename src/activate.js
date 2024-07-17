@@ -82,14 +82,14 @@ async function Run() {
                 var maskedSerial = serial.slice(0, -4) + `XXXX`;
                 core.setSecret(maskedSerial);
                 core.startGroup(`Activate Unity Professional License`);
-                var args = `-quit -serial ${serial} -username ${username} -password ${password}`;
+                var args = `-quit -batchmode -nographics -serial ${serial} -username ${username} -password ${password}`;
                 var exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
                 core.endGroup();
             } else if (licenseType.toLowerCase().startsWith('per')) {
                 // if personal license activate by using requesting activation file
                 core.startGroup(`Generate Unity License Request File`);
                 var exitCode = 0;
-                var args = `-quit -createManualActivationFile`;
+                var args = `-quit -batchmode -nographics -createManualActivationFile`;
                 try {
                     exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
                 } catch (error) {
@@ -136,7 +136,7 @@ async function Run() {
                 }
 
                 core.startGroup(`Activate Unity Personal License`);
-                args = `-quit -manualLicenseFile ""${ulfDir}""`;
+                args = `-quit -batchmode -nographics -manualLicenseFile ""${ulfDir}""`;
 
                 try {
                     exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
