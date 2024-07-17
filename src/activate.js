@@ -59,7 +59,7 @@ async function Run() {
 
         var licenseClient = getLicensingClient();
         core.debug(`Unity Licensing Client Path: ${licenseClient}`);
-        await exec.exec(`${licenseClient} --version`);
+        await exec.exec(`"${licenseClient}" --version`);
 
         var pwsh = await io.which("pwsh", true);
         var unity_action = path.resolve(__dirname, 'unity-action.ps1');
@@ -210,7 +210,8 @@ const getLicensingClient = () => {
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
     // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
     const editorPath = process.env.UNITY_EDITOR_PATH;
-    const version = process.env.UNITY_VERSION;
+    // parse version string from editor path
+    const version = editorPath.match(/(\d+\.\d+\.\d+[a-z]?\d?)/)[0];
     core.debug(`Unity Editor Path: ${editorPath}`);
     core.debug(`Unity Version: ${version}`);
 
