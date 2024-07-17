@@ -83,6 +83,7 @@ async function Run() {
                 core.setSecret(maskedSerial);
                 core.startGroup(`Activate Unity Professional License`);
                 var args = `-quit -batchmode -nographics -serial ${serial} -username ${username} -password ${password}`;
+
                 try {
                     await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
                 } finally {
@@ -150,12 +151,13 @@ async function Run() {
                 }
             } else {
                 core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`);
+                return;
             }
         }, 3);
         await new Promise(r => setTimeout(r, 3000));
 
         if (!hasExistingLicense()) {
-            throw Error('Unity License Activation Failed!');
+            throw Error('Unable to find Unity License!');
         }
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
@@ -213,7 +215,7 @@ const getLicensingClient = () => {
     // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
     // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
-    const editorPath = path.resolve(process.env.UNITY_EDITOR_PATH, '..');
+    const editorPath = platform !== 'darwin' ? path.resolve(process.env.UNITY_EDITOR_PATH, '..') : process.env.UNITY_EDITOR_PATH;
     const version = editorPath.match(/(\d+\.\d+\.\d+[a-z]?\d?)/)[0];
     core.debug(`Unity Editor Path: ${editorPath}`);
     core.debug(`Unity Version: ${version}`);
