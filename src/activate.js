@@ -287,7 +287,8 @@ const PrintLogs = () => {
     };
 
     if (fs.existsSync(licenseLogs[process.platform])) {
-        core.info(`Unity Licensing Client Log: ${licenseLogs[process.platform]}`);
+        const logContent = fs.readFileSync(licenseLogs[process.platform], 'utf8');
+        core.debug(`Unity Licensing Client Log: ${licenseLogs[process.platform]}\n${logContent}`);
     } else {
         core.warning(`Unity Licensing Client Log: ${licenseLogs[process.platform]} not found!`);
     }
@@ -303,7 +304,8 @@ const PrintLogs = () => {
     };
 
     if (fs.existsSync(hubLogs[process.platform])) {
-        core.info(`Unity Hub Log: ${hubLogs[process.platform]}`);
+        const logContent = fs.readFileSync(hubLogs[process.platform], 'utf8');
+        core.debug(`Unity Hub Log: ${hubLogs[process.platform]}\n${logContent}`);
     } else {
         core.warning(`Unity Hub Log: ${hubLogs[process.platform]} not found!`);
     }
