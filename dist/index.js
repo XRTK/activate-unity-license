@@ -58560,7 +58560,7 @@ async function Run() {
         }, 3);
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
-        PrintLogs();
+        GetLogs();
     }
 }
 
@@ -58685,15 +58685,16 @@ const hasExistingLicense = () => {
     return false;
 };
 
-const PrintLogs = () => {
+const GetLogs = () => {
     const licenseLogs = {
         win32: path.resolve(process.env.APPDATA || '', 'Unity', 'Unity.Licensing.Client.log'),
         darwin: path.resolve(process.env.HOME || '', 'Library', 'Logs', 'Unity', 'Unity.Licensing.Client.log'),
         linux: path.resolve(process.env.HOME || '', '.config', 'unity3d', 'Unity', 'Unity.Licensing.Client.log')
     };
 
+    core.debug(`Unity Licensing Client Log: ${licenseLogs[process.platform]}`);
+
     if (fs.existsSync(licenseLogs[process.platform])) {
-        core.debug(`Unity Licensing Client Log: ${licenseLogs[process.platform]}`);
         copyFileToWorkspace(licenseLogs[process.platform], 'Unity.Licensing.Client.log');
     } else {
         core.warning(`Unity Licensing Client Log: ${licenseLogs[process.platform]} not found!`);
@@ -58705,8 +58706,9 @@ const PrintLogs = () => {
         linux: path.resolve(process.env.HOME || '', '.config', 'UnityHub', 'logs', 'info-log.json')
     };
 
+    core.debug(`Unity Hub Log: ${hubLogs[process.platform]}`);
+
     if (fs.existsSync(hubLogs[process.platform])) {
-        core.debug(`Unity Hub Log: ${hubLogs[process.platform]}`);
         copyFileToWorkspace(hubLogs[process.platform], 'UnityHub.log');
     } else {
         core.warning(`Unity Hub Log: ${hubLogs[process.platform]} not found!`);
