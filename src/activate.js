@@ -209,24 +209,35 @@ const getLicensingClient = () => {
     // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
     // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
-    var editorPath = process.env.UNITY_EDITOR_PATH;
+    const editorPath = process.env.UNITY_EDITOR_PATH;
+    const version = process.env.UNITY_VERSION;
+    core.debug(`Unity Editor Path: ${editorPath}`);
+    core.debug(`Unity Version: ${version}`);
+
+    var licenseClientPath;
+
     switch (platform) {
         case 'win32':
-            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client', "Unity.Licensing.Client.exe");
+            licenseClientPath = path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client', "Unity.Licensing.Client.exe");
+            break;
         case 'darwin':
-            const version = process.env.UNITY_VERSION;
             const [major, minor, patch] = version.split('.');
             const isOlderThan2021_3_19 = major < 2021 || (major == 2021 && minor < 3) || (major == 2021 && minor == 3 && patch < 19);
             if (isOlderThan2021_3_19) {
-                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'Resources', 'Unity.Licensing.Client');
+                licenseClientPath = path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'Resources', 'Unity.Licensing.Client');
             } else {
-                return path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'MacOS', 'Unity.Licensing.Client');
+                licenseClientPath = path.resolve(editorPath, 'Contents', 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'MacOS', 'Unity.Licensing.Client');
             }
+            break;
         case 'linux':
-            return path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client', "Unity.Licensing.Client");
+            licenseClientPath = path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client', "Unity.Licensing.Client");
+            break;
         default:
             throw Error(`Unsupported platform: ${platform}`);
     }
+
+    core.debug(`Unity Licensing Client Path: ${licenseClientPath}`);
+    return licenseClientPath;
 };
 
 const hasExistingLicense = () => {
