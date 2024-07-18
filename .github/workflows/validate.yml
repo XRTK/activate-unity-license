@@ -22,14 +22,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      #max-parallel: 2 # Use this if you're activating pro license with matrix
+      # max-parallel: 2 # Use this if you're activating pro license with matrix
       matrix:
         include:
           - os: ubuntu-latest
             build-target: StandaloneLinux64
           - os: windows-latest
             build-target: StandaloneWindows64
-          - os: macos-latest
+          - os: macos-13
             build-target: StandaloneOSX
 
     steps:
@@ -58,13 +58,10 @@ jobs:
       - name: xrtk/activate-unity-license
         uses: ./
         with:
-          # Required
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
-          # Optional
-          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
-          # serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
-          auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
+          # serial: ${{ secrets.UNITY_SERIAL }} # Required for pro activations
 
       - name: Unity Build (${{ matrix.build-target }})
         uses: xrtk/unity-action@v6
@@ -77,7 +74,9 @@ jobs:
         if: always()
         with:
           name: '${{ runner.os }}-${{ matrix.build-target }}-Artifacts'
-          path: '${{ env.UNITY_PROJECT_PATH }}/Builds'
+          path: |
+            ${{ env.UNITY_PROJECT_PATH }}/Builds
+            **/*.log
 
       - name: Clean Artifacts
         if: always()
