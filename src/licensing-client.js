@@ -52,7 +52,9 @@ const getLicensingClient = () => {
 const maskSerialInOutput = (output) => {
     const serialPattern = /([\w-]+-XXXX)/g;
     return output.replace(serialPattern, (_, serial) => {
-        return serial.slice(0, -4) + 'XXXX';
+        const maskedSerial = serial.slice(0, -4) + `XXXX`;
+        core.setSecret(maskedSerial);
+        return serial;
     });
 };
 
