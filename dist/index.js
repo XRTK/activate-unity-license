@@ -26158,41 +26158,42 @@ const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
 const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
-const { readdir } = __nccwpck_require__(3292);
+const licenseClient = __nccwpck_require__(917);
 const platform = process.platform;
 
 async function Run() {
     try {
-        if (hasExistingLicense()) {
+        if (licenseClient.hasExistingLicense()) {
             core.info('Unity License already activated!');
             return;
         } else {
             core.debug('Attempting to activate Unity License...');
+            core.saveState('isPost', true);
         }
 
-        var editorPath = process.env.UNITY_EDITOR_PATH;
+        const editorPath = process.env.UNITY_EDITOR_PATH;
 
         if (!editorPath) {
-            throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
+            throw Error("Missing UNITY_EDITOR_PATH!");
         }
 
-        var username = core.getInput('username');
+        const username = core.getInput('username');
 
         if (!username) {
             throw Error('Missing username input');
         }
 
-        var password = core.getInput('password');
+        const password = core.getInput('password');
 
         if (!password) {
             throw Error('Missing password input');
         }
 
-        var licenseClient = getLicensingClient();
-        core.debug(`Unity Licensing Client Path: ${licenseClient}`);
-        await exec.exec(`"${licenseClient}" --version`);
+        const client = licenseClient.getLicensingClient();
+        core.debug(`Unity Licensing Client Path: ${client}`);
+        await exec.exec(`"${client}" --version`);
 
-        var licenseType = core.getInput('license-type');
+        const licenseType = core.getInput('license-type');
         var args = `--activate-ulf --username "${username}" --password "${password}"`;
 
         if (licenseType.toLowerCase().startsWith('pro')) {
@@ -26207,21 +26208,96 @@ async function Run() {
             args += ` --serial ${serial}`;
         }
 
-        await exec.exec(`"${licenseClient}" ${args}`);
+        await exec.exec(`"${client}" ${args}`);
         await new Promise(r => setTimeout(r, 3000));
 
-        if (!hasExistingLicense()) {
+        if (!licenseClient.hasExistingLicense()) {
             throw Error('Unable to find Unity License!');
         }
 
-        await exec.exec(`"${licenseClient}" --showEntitlements`);
+        await exec.exec(`"${client}" --showEntitlements`);
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
     }
 }
 
-const getLicensingClient = () => {
+const GetLogs = () => {
+    const licenseLogs = {
+        win32: path.resolve(process.env.APPDATA || '', 'Unity', 'Unity.Licensing.Client.log'),
+        darwin: path.resolve(process.env.HOME || '', 'Library', 'Logs', 'Unity', 'Unity.Licensing.Client.log'),
+        linux: path.resolve(process.env.HOME || '', '.config', 'unity3d', 'Unity', 'Unity.Licensing.Client.log')
+    };
+
+    core.debug(`Unity Licensing Client Log: ${licenseLogs[platform]}`);
+
+    if (fs.existsSync(licenseLogs[platform])) {
+        copyFileToWorkspace(licenseLogs[platform], 'Unity.Licensing.Client.log');
+    } else {
+        core.warning(`Unity Licensing Client Log: ${licenseLogs[platform]} not found!`);
+    }
+
+    const hubLogs = {
+        win32: path.resolve(process.env.APPDATA || '', 'UnityHub', 'logs', 'info-log.json'),
+        darwin: path.resolve(process.env.HOME || '', 'Library', 'Application Support', 'UnityHub', 'logs', 'info-log.json'),
+        linux: path.resolve(process.env.HOME || '', '.config', 'UnityHub', 'logs', 'info-log.json')
+    };
+
+    core.debug(`Unity Hub Log: ${hubLogs[platform]}`);
+
+    if (fs.existsSync(hubLogs[platform])) {
+        copyFileToWorkspace(hubLogs[platform], 'UnityHub.log');
+    } else {
+        core.warning(`Unity Hub Log: ${hubLogs[platform]} not found!`);
+    }
+};
+
+const copyFileToWorkspace = (filePath, fileName) => {
+    const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
+    const logPath = path.resolve(workspace, fileName);
+    fs.copyFileSync(filePath, logPath);
+};
+
+module.exports = { Run };
+
+
+/***/ }),
+
+/***/ 8162:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(2186);
+const exec = __nccwpck_require__(1514);
+const licensingClient = __nccwpck_require__(917);
+
+async function Run() {
+    try {
+        if (licensingClient.hasExistingLicense()) {
+            console.info(`::group::Returning Unity License`);
+            const client = licensingClient.getLicensingClient();
+            await exec.exec(`"${client}" --return-ulf`);
+            await exec.exec(`"${client}" --showEntitlements`);
+            console.info(`::endgroup::`);
+        }
+    } catch (error) {
+        core.setFailed(`Failed to deactivate license! ${error.message}`);
+    }
+};
+
+module.exports = { Run }
+
+
+/***/ }),
+
+/***/ 917:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(2186);
+const fs = __nccwpck_require__(7147);
+const path = __nccwpck_require__(1017);
+const platform = process.platform;
+
+function getLicensingClient() {
     // Windows: <UnityEditorDir>\Data\Resources\Licensing\Client
     // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
@@ -26264,9 +26340,9 @@ const getLicensingClient = () => {
     }
 
     return licenseClientPath;
-};
+}
 
-const hasExistingLicense = () => {
+function hasExistingLicense() {
     core.debug('Checking for existing Unity License activation...');
 
     const licensePaths = {
@@ -26325,8 +26401,8 @@ const hasExistingLicense = () => {
         } else {
             core.debug(`License file does not exist at path: ${ulfPath}`);
         }
-    } catch (err) {
-        core.debug(`Error checking ulf path: ${err.message}`);
+    } catch (error) {
+        core.debug(`Error checking ulf path: ${error.message}`);
     }
 
     try {
@@ -26336,118 +26412,15 @@ const hasExistingLicense = () => {
         } else {
             core.debug(`Licenses directory does not exist: ${licensesDir}`);
         }
-    } catch (err) {
-        core.debug(`Error checking licenses directory: ${err.message}`);
+    } catch (error) {
+        core.debug(`Error checking licenses directory: ${error.message}`);
     }
 
     return false;
-};
+}
 
-const GetLogs = () => {
-    const licenseLogs = {
-        win32: path.resolve(process.env.APPDATA || '', 'Unity', 'Unity.Licensing.Client.log'),
-        darwin: path.resolve(process.env.HOME || '', 'Library', 'Logs', 'Unity', 'Unity.Licensing.Client.log'),
-        linux: path.resolve(process.env.HOME || '', '.config', 'unity3d', 'Unity', 'Unity.Licensing.Client.log')
-    };
+module.exports = { getLicensingClient, hasExistingLicense };
 
-    core.debug(`Unity Licensing Client Log: ${licenseLogs[platform]}`);
-
-    if (fs.existsSync(licenseLogs[platform])) {
-        copyFileToWorkspace(licenseLogs[platform], 'Unity.Licensing.Client.log');
-    } else {
-        core.warning(`Unity Licensing Client Log: ${licenseLogs[platform]} not found!`);
-    }
-
-    const hubLogs = {
-        win32: path.resolve(process.env.APPDATA || '', 'UnityHub', 'logs', 'info-log.json'),
-        darwin: path.resolve(process.env.HOME || '', 'Library', 'Application Support', 'UnityHub', 'logs', 'info-log.json'),
-        linux: path.resolve(process.env.HOME || '', '.config', 'UnityHub', 'logs', 'info-log.json')
-    };
-
-    core.debug(`Unity Hub Log: ${hubLogs[platform]}`);
-
-    if (fs.existsSync(hubLogs[platform])) {
-        copyFileToWorkspace(hubLogs[platform], 'UnityHub.log');
-    } else {
-        core.warning(`Unity Hub Log: ${hubLogs[platform]} not found!`);
-    }
-};
-
-const copyFileToWorkspace = (filePath, fileName) => {
-    const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
-    const logPath = path.resolve(workspace, fileName);
-    fs.copyFileSync(filePath, logPath);
-};
-
-module.exports = { Run };
-
-
-/***/ }),
-
-/***/ 8162:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const core = __nccwpck_require__(2186);
-const exec = __nccwpck_require__(1514);
-const io = __nccwpck_require__(7436);
-const path = __nccwpck_require__(1017);
-
-async function Run() {
-    try {
-        var licenseType = core.getInput('license-type');
-
-        if (licenseType.toLowerCase().startsWith('pro')) {
-            // return license if pro/plus
-            console.log(`::group::Returning ${licenseType} Unity License`);
-
-            var editorPath = process.env.UNITY_EDITOR_PATH;
-
-            if (!editorPath) {
-                throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
-            }
-
-            var projectPath = process.env.UNITY_PROJECT_PATH;
-
-            if (!projectPath) {
-                throw Error("Missing UNITY_PROJECT_PATH! Requires xrtk/unity-setup to run before this step.");
-            }
-
-            var username = core.getInput('username');
-
-            if (!username) {
-                throw Error('Missing username input');
-            }
-
-            var password = core.getInput('password');
-
-            if (!password) {
-                throw Error('Missing password input');
-            }
-
-            var pwsh = await io.which("pwsh", true);
-            var unity_action = path.resolve(__dirname, 'unity-action.ps1');
-            // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
-            var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
-            var exitCode = 0;
-
-            try {
-                exitCode = await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ReturnLicense`);
-            } catch (error) {
-                console.error(error.message);
-            }
-
-            console.log(`::endgroup::`);
-
-            if (exitCode != 0) {
-                throw Error(`Failed to deactivate license! errorCode: ${exitCode}`);
-            }
-        }
-    } catch (error) {
-        core.setFailed(error.message);
-    }
-};
-
-module.exports = { Run }
 
 /***/ }),
 
@@ -26528,14 +26501,6 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
-
-/***/ }),
-
-/***/ 3292:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("fs/promises");
 
 /***/ }),
 
@@ -28365,8 +28330,6 @@ const deactivate = __nccwpck_require__(8162);
 const IsPost = !!core.getState('isPost');
 
 const main = async () => {
-    core.saveState('isPost', true);
-
     if (!IsPost) {
         // activate license
         await activate.Run();
@@ -28376,8 +28339,8 @@ const main = async () => {
     }
 }
 
-// Call the main function to run the action
 main();
+
 })();
 
 module.exports = __webpack_exports__;
