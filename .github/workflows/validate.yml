@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      #max-parallel: 2 # Use this if you're activating pro license with matrix
+      # max-parallel: 2 # Use this if you're activating pro license with matrix
       matrix:
         include:
           - os: ubuntu-latest
@@ -58,13 +58,10 @@ jobs:
       - name: xrtk/activate-unity-license
         uses: ./
         with:
-          # Required
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
-          # Optional
-          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
-          # serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
-          auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
+          # serial: ${{ secrets.UNITY_SERIAL }} # Required for pro activations
 
       - name: Unity Build (${{ matrix.build-target }})
         uses: xrtk/unity-action@v6

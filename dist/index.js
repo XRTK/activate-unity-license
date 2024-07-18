@@ -26155,7 +26155,6 @@ exports["default"] = _default;
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(2186);
-const exec = __nccwpck_require__(1514);
 const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const licenseClient = __nccwpck_require__(917);
@@ -26168,6 +26167,7 @@ async function Run() {
             return;
         } else {
             core.debug('Attempting to activate Unity License...');
+            await licenseClient.version();
             core.saveState('isPost', true);
         }
 
@@ -26189,32 +26189,20 @@ async function Run() {
             throw Error('Missing password input');
         }
 
-        const client = licenseClient.getLicensingClient();
-        core.debug(`Unity Licensing Client Path: ${client}`);
-        await exec.exec(`"${client}" --version`);
-
+        const serial = core.getInput('serial');
         const licenseType = core.getInput('license-type');
-        var args = `--activate-ulf --username "${username}" --password "${password}"`;
 
-        if (licenseType.toLowerCase().startsWith('pro')) {
-            const serial = core.getInput('serial');
-
-            if (!serial) {
-                throw Error('Missing serial input');
-            }
-
-            const maskedSerial = serial.slice(0, -4) + `XXXX`;
-            core.setSecret(maskedSerial);
-            args += ` --serial ${serial}`;
+        if (licenseType.toLowerCase().startsWith('pro') && !serial) {
+            throw Error('Missing serial input');
         }
 
-        await exec.exec(`"${client}" ${args}`);
+        await licenseClient.activateLicense(username, password, serial);
 
         if (!licenseClient.hasExistingLicense()) {
             throw Error('Unable to find Unity License!');
         }
 
-        await exec.exec(`"${client}" --showEntitlements`);
+        await licenseClient.showEntitlements();
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
@@ -26266,16 +26254,13 @@ module.exports = { Run };
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(2186);
-const exec = __nccwpck_require__(1514);
 const licensingClient = __nccwpck_require__(917);
 
 async function Run() {
     try {
         if (licensingClient.hasExistingLicense()) {
             console.info(`::group::Returning Unity License`);
-            const client = licensingClient.getLicensingClient();
-            await exec.exec(`"${client}" --return-ulf`);
-            await exec.exec(`"${client}" --showEntitlements`);
+            await licensingClient.returnLicense();
             console.info(`::endgroup::`);
         }
     } catch (error) {
@@ -26292,16 +26277,17 @@ module.exports = { Run }
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(2186);
+const exec = __nccwpck_require__(1514);
 const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const platform = process.platform;
 
-function getLicensingClient() {
+const getLicensingClient = () => {
     // Windows: <UnityEditorDir>\Data\Resources\Licensing\Client
     // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
     // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
-    var editorPath = platform !== 'darwin' ? path.resolve(process.env.UNITY_EDITOR_PATH, '..') : path.resolve(process.env.UNITY_EDITOR_PATH, '..', '..');
+    let editorPath = platform !== 'darwin' ? path.resolve(process.env.UNITY_EDITOR_PATH, '..') : path.resolve(process.env.UNITY_EDITOR_PATH, '..', '..');
     const version = editorPath.match(/(\d+\.\d+\.\d+[a-z]?\d?)/)[0];
     core.debug(`Unity Editor Path: ${editorPath}`);
     core.debug(`Unity Version: ${version}`);
@@ -26310,7 +26296,7 @@ function getLicensingClient() {
         throw Error(`Unity Editor not found at path: ${editorPath}`);
     }
 
-    var licenseClientPath;
+    let licenseClientPath;
 
     switch (platform) {
         case 'win32':
@@ -26339,7 +26325,40 @@ function getLicensingClient() {
     }
 
     return licenseClientPath;
-}
+};
+
+const maskSerialInOutput = (output) => {
+    const serialPattern = /([\w-]+-XXXX)/g;
+    return output.replace(serialPattern, (_, serial) => {
+        return serial.slice(0, -4) + 'XXXX';
+    });
+};
+
+const client = getLicensingClient();
+
+async function execWithMask(command) {
+    let output = '';
+    let error = '';
+    try {
+        await exec.exec(command, [], {
+            silent: true,
+            listeners: {
+                stdout: (data) => {
+                    output += data.toString();
+                },
+                stderr: (data) => {
+                    error += data.toString();
+                }
+            }
+        });
+
+    } finally {
+        core.info(maskSerialInOutput(output));
+        if (error !== '') {
+            throw Error(error);
+        }
+    }
+};
 
 function hasExistingLicense() {
     core.debug('Checking for existing Unity License activation...');
@@ -26418,7 +26437,32 @@ function hasExistingLicense() {
     return false;
 }
 
-module.exports = { getLicensingClient, hasExistingLicense };
+async function version() {
+    await execWithMask(`"${client}" --version`);
+}
+
+async function showEntitlements() {
+    await execWithMask(`"${client}" --showEntitlements`);
+}
+
+async function activateLicense(username, password, serial) {
+    let args = `--activate-ulf --username "${username}" --password "${password}"`;
+
+    if (serial !== undefined && serial !== '') {
+        args += ` --serial "${serial}"`;
+        const maskedSerial = serial.slice(0, -4) + `XXXX`;
+        core.setSecret(maskedSerial);
+    }
+
+    await execWithMask(`"${client}" ${args}`);
+}
+
+async function returnLicense() {
+    await execWithMask(`"${client}" --return-ulf`);
+    await showEntitlements();
+}
+
+module.exports = { hasExistingLicense, version, showEntitlements, activateLicense, returnLicense };
 
 
 /***/ }),

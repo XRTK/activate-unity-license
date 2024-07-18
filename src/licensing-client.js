@@ -1,14 +1,15 @@
 const core = require('@actions/core');
+const exec = require('@actions/exec');
 const fs = require("fs");
 const path = require('path');
 const platform = process.platform;
 
-function getLicensingClient() {
+const getLicensingClient = () => {
     // Windows: <UnityEditorDir>\Data\Resources\Licensing\Client
     // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
     // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
-    var editorPath = platform !== 'darwin' ? path.resolve(process.env.UNITY_EDITOR_PATH, '..') : path.resolve(process.env.UNITY_EDITOR_PATH, '..', '..');
+    let editorPath = platform !== 'darwin' ? path.resolve(process.env.UNITY_EDITOR_PATH, '..') : path.resolve(process.env.UNITY_EDITOR_PATH, '..', '..');
     const version = editorPath.match(/(\d+\.\d+\.\d+[a-z]?\d?)/)[0];
     core.debug(`Unity Editor Path: ${editorPath}`);
     core.debug(`Unity Version: ${version}`);
@@ -17,7 +18,7 @@ function getLicensingClient() {
         throw Error(`Unity Editor not found at path: ${editorPath}`);
     }
 
-    var licenseClientPath;
+    let licenseClientPath;
 
     switch (platform) {
         case 'win32':
@@ -46,7 +47,40 @@ function getLicensingClient() {
     }
 
     return licenseClientPath;
-}
+};
+
+const maskSerialInOutput = (output) => {
+    const serialPattern = /([\w-]+-XXXX)/g;
+    return output.replace(serialPattern, (_, serial) => {
+        return serial.slice(0, -4) + 'XXXX';
+    });
+};
+
+const client = getLicensingClient();
+
+async function execWithMask(command) {
+    let output = '';
+    let error = '';
+    try {
+        await exec.exec(command, [], {
+            silent: true,
+            listeners: {
+                stdout: (data) => {
+                    output += data.toString();
+                },
+                stderr: (data) => {
+                    error += data.toString();
+                }
+            }
+        });
+
+    } finally {
+        core.info(maskSerialInOutput(output));
+        if (error !== '') {
+            throw Error(error);
+        }
+    }
+};
 
 function hasExistingLicense() {
     core.debug('Checking for existing Unity License activation...');
@@ -125,4 +159,29 @@ function hasExistingLicense() {
     return false;
 }
 
-module.exports = { getLicensingClient, hasExistingLicense };
+async function version() {
+    await execWithMask(`"${client}" --version`);
+}
+
+async function showEntitlements() {
+    await execWithMask(`"${client}" --showEntitlements`);
+}
+
+async function activateLicense(username, password, serial) {
+    let args = `--activate-ulf --username "${username}" --password "${password}"`;
+
+    if (serial !== undefined && serial !== '') {
+        args += ` --serial "${serial}"`;
+        const maskedSerial = serial.slice(0, -4) + `XXXX`;
+        core.setSecret(maskedSerial);
+    }
+
+    await execWithMask(`"${client}" ${args}`);
+}
+
+async function returnLicense() {
+    await execWithMask(`"${client}" --return-ulf`);
+    await showEntitlements();
+}
+
+module.exports = { hasExistingLicense, version, showEntitlements, activateLicense, returnLicense };

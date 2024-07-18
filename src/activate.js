@@ -1,5 +1,4 @@
 const core = require('@actions/core');
-const exec = require('@actions/exec');
 const fs = require("fs");
 const path = require('path');
 const licenseClient = require('./licensing-client');
@@ -12,6 +11,7 @@ async function Run() {
             return;
         } else {
             core.debug('Attempting to activate Unity License...');
+            await licenseClient.version();
             core.saveState('isPost', true);
         }
 
@@ -33,32 +33,20 @@ async function Run() {
             throw Error('Missing password input');
         }
 
-        const client = licenseClient.getLicensingClient();
-        core.debug(`Unity Licensing Client Path: ${client}`);
-        await exec.exec(`"${client}" --version`);
-
+        const serial = core.getInput('serial');
         const licenseType = core.getInput('license-type');
-        var args = `--activate-ulf --username "${username}" --password "${password}"`;
 
-        if (licenseType.toLowerCase().startsWith('pro')) {
-            const serial = core.getInput('serial');
-
-            if (!serial) {
-                throw Error('Missing serial input');
-            }
-
-            const maskedSerial = serial.slice(0, -4) + `XXXX`;
-            core.setSecret(maskedSerial);
-            args += ` --serial ${serial}`;
+        if (licenseType.toLowerCase().startsWith('pro') && !serial) {
+            throw Error('Missing serial input');
         }
 
-        await exec.exec(`"${client}" ${args}`);
+        await licenseClient.activateLicense(username, password, serial);
 
         if (!licenseClient.hasExistingLicense()) {
             throw Error('Unable to find Unity License!');
         }
 
-        await exec.exec(`"${client}" --showEntitlements`);
+        await licenseClient.showEntitlements();
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
