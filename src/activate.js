@@ -41,19 +41,18 @@ async function Run() {
         var args = `--activate-ulf --username "${username}" --password "${password}"`;
 
         if (licenseType.toLowerCase().startsWith('pro')) {
-            var serial = core.getInput('serial');
+            const serial = core.getInput('serial');
 
             if (!serial) {
                 throw Error('Missing serial input');
             }
 
-            var maskedSerial = serial.slice(0, -4) + `XXXX`;
+            const maskedSerial = serial.slice(0, -4) + `XXXX`;
             core.setSecret(maskedSerial);
             args += ` --serial ${serial}`;
         }
 
         await exec.exec(`"${client}" ${args}`);
-        await new Promise(r => setTimeout(r, 3000));
 
         if (!licenseClient.hasExistingLicense()) {
             throw Error('Unable to find Unity License!');
