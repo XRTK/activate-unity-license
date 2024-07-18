@@ -4,7 +4,6 @@ const io = require('@actions/io');
 const fs = require("fs");
 const path = require('path');
 const { readdir } = require('fs/promises');
-const { Activator } = require('./unity-activator/activator');
 const platform = process.platform;
 
 async function retry(fn, retries = 3) {
@@ -37,12 +36,6 @@ async function Run() {
             throw Error("Missing UNITY_EDITOR_PATH! Requires xrtk/unity-setup to run before this step.");
         }
 
-        var projectPath = process.env.UNITY_PROJECT_PATH;
-
-        if (!projectPath) {
-            throw Error("Missing UNITY_PROJECT_PATH! Requires xrtk/unity-setup to run before this step.");
-        }
-
         var username = core.getInput('username');
 
         if (!username) {
@@ -55,112 +48,43 @@ async function Run() {
             throw Error('Missing password input');
         }
 
-        var authKey = core.getInput('auth-key');
-
         var licenseClient = getLicensingClient();
         core.debug(`Unity Licensing Client Path: ${licenseClient}`);
         await exec.exec(`"${licenseClient}" --version`);
 
-        var pwsh = await io.which("pwsh", true);
-        var unity_action = path.resolve(__dirname, 'unity-action.ps1');
         var licenseType = core.getInput('license-type');
+        var args = `--activate-ulf --username ${username} --password ${password}`;
 
-        // if pro check serial input
         if (licenseType.toLowerCase().startsWith('pro')) {
-            // if pro/plus license activate by using UNITY_SERIAL env variable
             var serial = core.getInput('serial');
 
             if (!serial) {
                 throw Error('Missing serial input');
             }
+
+            var maskedSerial = serial.slice(0, -4) + `XXXX`;
+            core.setSecret(maskedSerial);
+            args += ` --serial ${serial}`;
         }
 
-        await retry(async () => {
-            if (licenseType.toLowerCase().startsWith('pro')) {
-                // Unity only likes to mask the last 4 characters of serial.
-                // Let's mask all of it.
-                var maskedSerial = serial.slice(0, -4) + `XXXX`;
-                core.setSecret(maskedSerial);
-                core.startGroup(`Activate Unity Professional License`);
-                var args = `-quit -batchmode -nographics -serial ${serial} -username ${username} -password ${password}`;
-
-                try {
-                    await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ProLicenseActivation`);
-                } finally {
-                    core.endGroup();
-                }
-            } else if (licenseType.toLowerCase().startsWith('per')) {
-                // if personal license activate by using requesting activation file
-                core.startGroup(`Generate Unity License Request File`);
-                var args = `-quit -batchmode -nographics -createManualActivationFile`;
-
-                try {
-                    await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName ManualLicenseRequest`);
-                } finally {
-                    core.endGroup();
-                }
-
-                var exeDir = path.resolve(process.cwd());
-                core.debug(`exeDir: ${exeDir}`);
-                var files = await findByExtension(exeDir, '.alf');
-                var alfPath = files[0];
-
-                core.debug(`alf Path: "${alfPath}"`);
-
-                if (!alfPath) {
-                    throw Error(`Failed to find generated license alf request file!`);
-                }
-
-                core.startGroup(`Download Unity License Activation File`);
-
-                await new Activator({
-                    file: alfPath,
-                    debug: core.isDebug(),
-                    username: username,
-                    password: password,
-                    key: authKey,
-                    serial: '',
-                    out: exeDir,
-                })
-                    .run()
-                    .catch(e => {
-                        core.error(e.message);
-                    });
-
-                core.endGroup();
-
-                files = await findByExtension(exeDir, '.ulf');
-                var ulfDir = files[0];
-
-                core.debug(`ulf file: "${ulfDir}"`);
-
-                if (!ulfDir) {
-                    throw Error(`Failed to find manual license ulf file!`);
-                }
-
-                core.startGroup(`Activate Unity Personal License`);
-                args = `-quit -batchmode -nographics -manualLicenseFile ""${ulfDir}""`;
-
-                try {
-                    await exec.exec(`"${pwsh}" -Command`, `${unity_action} -editorPath "${editorPath}" -projectPath "${projectPath}" -additionalArgs "${args}" -logName PersonalLicenseActivation`);
-                } finally {
-                    // cleanup
-                    fs.unlink(alfPath, () => core.debug(`removed: ${alfPath}`));
-                    fs.unlink(ulfDir, () => core.debug(`removed: ${ulfDir}`));
-                    core.endGroup();
-                }
-            } else {
-                core.setFailed(`Invalid License type provided: '${licenseType}' | expects: 'professional' or 'personal'`);
-                return;
-            }
-        }, 3);
+        await exec.exec(licenseClient, args);
         await new Promise(r => setTimeout(r, 3000));
 
         if (!hasExistingLicense()) {
             throw Error('Unable to find Unity License!');
         }
 
-        await exec.exec(`"${licenseClient}" --showEntitlements`);
+        var entitlements = '';
+        await exec.exec(licenseClient, "--showEntitlements", {
+            listeners: {
+                stdout: (data) => {
+                    entitlements += data.toString();
+                }
+            }
+        });
+        var serial = entitlements.match(/EntitlementGroupId: ([A-Z0-9-]+)/)[1];
+        var maskedSerial = serial.slice(0, -4) + `XXXX`;
+        core.setSecret(maskedSerial);
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
