@@ -26209,7 +26209,7 @@ async function Run() {
         await exec.exec(`"${licenseClient}" --version`);
 
         var licenseType = core.getInput('license-type');
-        var args = `--activate-ulf --username ${username} --password ${password}`;
+        var args = `--activate-ulf --username "${username}" --password "${password}"`;
 
         if (licenseType.toLowerCase().startsWith('pro')) {
             var serial = core.getInput('serial');
