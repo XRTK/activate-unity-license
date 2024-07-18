@@ -1,25 +1,9 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
-const io = require('@actions/io');
 const fs = require("fs");
 const path = require('path');
 const { readdir } = require('fs/promises');
 const platform = process.platform;
-
-async function retry(fn, retries = 3) {
-    let lastError;
-    for (let i = 0; i < retries; i++) {
-        try {
-            await fn();
-            return;
-        } catch (error) {
-            lastError = error;
-            core.warning(`Attempt ${i + 1} failed: ${error.message}`);
-            await new Promise(r => setTimeout(r, 2000 * i));
-        }
-    }
-    throw lastError;
-}
 
 async function Run() {
     try {
@@ -27,7 +11,7 @@ async function Run() {
             core.info('Unity License already activated!');
             return;
         } else {
-            core.info('Attempting to activate Unity License...');
+            core.debug('Attempting to activate Unity License...');
         }
 
         var editorPath = process.env.UNITY_EDITOR_PATH;
@@ -74,67 +58,12 @@ async function Run() {
             throw Error('Unable to find Unity License!');
         }
 
-        var entitlements = '';
-        await exec.exec(`"${licenseClient}" --showEntitlements`, {
-            listeners: {
-                stdout: (data) => {
-                    entitlements += data.toString();
-                }
-            }
-        });
-        var serial = entitlements.match(/EntitlementGroupId: ([A-Z0-9-]+)/)[1];
-        var maskedSerial = serial.slice(0, -4) + `XXXX`;
-        core.setSecret(maskedSerial);
+        await exec.exec(`"${licenseClient}" --showEntitlements`);
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
     }
 }
-
-const findByExtension = async (dir, ext) => {
-    const directories = [];
-    const matchedFiles = [];
-    const files = await readdir(dir);
-
-    for (const file of files) {
-        const item = path.resolve(dir, file);
-
-        if (fs.statSync(`${dir}/${file}`).isDirectory()) {
-            directories.push(item);
-        } else if (file.endsWith(ext)) {
-            core.debug(`--> Found! ${item}`);
-            matchedFiles.push(item);
-            break;
-        }
-    }
-
-    if (matchedFiles.length == 0) {
-        for (const subDir of directories) {
-            const nestedMatches = await findByExtension(subDir, ext);
-
-            for (const nestedMatch of nestedMatches) {
-                matchedFiles.push(nestedMatch);
-                break;
-            }
-        }
-    }
-
-    return matchedFiles;
-};
-
-const findWorkspace = async (dir) => {
-    core.debug(`Searching for .git root in: ${dir}`);
-    const files = await readdir(dir);
-
-    for (const file of files) {
-        if (file.match('\.git')) {
-            return path.resolve(dir);
-        }
-    }
-
-    const result = await findWorkspace(path.resolve(dir, '..'));
-    return result;
-};
 
 const getLicensingClient = () => {
     // Windows: <UnityEditorDir>\Data\Resources\Licensing\Client

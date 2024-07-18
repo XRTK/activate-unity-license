@@ -6,13 +6,7 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
-    "@actions/github": "^5.1.1",
-    "@actions/io": "^1.1.2",
-    "@jsbits/get-package-version": "^1.0.3",
-    "cac": "^6.7.1",
-    "log4js": "^6.3.0",
-    "otplib": "^12.0.1",
-    "puppeteer": "^19.2.2"
+    "@actions/github": "^5.1.1"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.34.0"

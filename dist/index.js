@@ -26156,26 +26156,10 @@ exports["default"] = _default;
 
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
-const io = __nccwpck_require__(7436);
 const fs = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const { readdir } = __nccwpck_require__(3292);
 const platform = process.platform;
-
-async function retry(fn, retries = 3) {
-    let lastError;
-    for (let i = 0; i < retries; i++) {
-        try {
-            await fn();
-            return;
-        } catch (error) {
-            lastError = error;
-            core.warning(`Attempt ${i + 1} failed: ${error.message}`);
-            await new Promise(r => setTimeout(r, 2000 * i));
-        }
-    }
-    throw lastError;
-}
 
 async function Run() {
     try {
@@ -26183,7 +26167,7 @@ async function Run() {
             core.info('Unity License already activated!');
             return;
         } else {
-            core.info('Attempting to activate Unity License...');
+            core.debug('Attempting to activate Unity License...');
         }
 
         var editorPath = process.env.UNITY_EDITOR_PATH;
@@ -26230,67 +26214,12 @@ async function Run() {
             throw Error('Unable to find Unity License!');
         }
 
-        var entitlements = '';
-        await exec.exec(`"${licenseClient}" --showEntitlements`, {
-            listeners: {
-                stdout: (data) => {
-                    entitlements += data.toString();
-                }
-            }
-        });
-        var serial = entitlements.match(/EntitlementGroupId: ([A-Z0-9-]+)/)[1];
-        var maskedSerial = serial.slice(0, -4) + `XXXX`;
-        core.setSecret(maskedSerial);
+        await exec.exec(`"${licenseClient}" --showEntitlements`);
     } catch (error) {
         core.setFailed(`Unity License Activation Failed! ${error.message}`);
         GetLogs();
     }
 }
-
-const findByExtension = async (dir, ext) => {
-    const directories = [];
-    const matchedFiles = [];
-    const files = await readdir(dir);
-
-    for (const file of files) {
-        const item = path.resolve(dir, file);
-
-        if (fs.statSync(`${dir}/${file}`).isDirectory()) {
-            directories.push(item);
-        } else if (file.endsWith(ext)) {
-            core.debug(`--> Found! ${item}`);
-            matchedFiles.push(item);
-            break;
-        }
-    }
-
-    if (matchedFiles.length == 0) {
-        for (const subDir of directories) {
-            const nestedMatches = await findByExtension(subDir, ext);
-
-            for (const nestedMatch of nestedMatches) {
-                matchedFiles.push(nestedMatch);
-                break;
-            }
-        }
-    }
-
-    return matchedFiles;
-};
-
-const findWorkspace = async (dir) => {
-    core.debug(`Searching for .git root in: ${dir}`);
-    const files = await readdir(dir);
-
-    for (const file of files) {
-        if (file.match('\.git')) {
-            return path.resolve(dir);
-        }
-    }
-
-    const result = await findWorkspace(path.resolve(dir, '..'));
-    return result;
-};
 
 const getLicensingClient = () => {
     // Windows: <UnityEditorDir>\Data\Resources\Licensing\Client
@@ -26496,7 +26425,7 @@ async function Run() {
             }
 
             var pwsh = await io.which("pwsh", true);
-            var unity_action = __nccwpck_require__.ab + "unity-action.ps1";
+            var unity_action = path.resolve(__dirname, 'unity-action.ps1');
             // -quit -batchmode -nographics -returnlicense -username name@example.com -password XXXXXXXXXXXXX
             var args = `-quit -batchmode -nographics -returnlicense -username ${username} -password ${password}`;
             var exitCode = 0;
