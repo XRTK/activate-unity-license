@@ -67,7 +67,7 @@ async function Run() {
             args += ` --serial ${serial}`;
         }
 
-        await exec.exec(`"${licenseClient}"`, args);
+        await exec.exec(`"${licenseClient}" ${args}`);
         await new Promise(r => setTimeout(r, 3000));
 
         if (!hasExistingLicense()) {
@@ -75,7 +75,7 @@ async function Run() {
         }
 
         var entitlements = '';
-        await exec.exec(`"${licenseClient}"`, "--showEntitlements", {
+        await exec.exec(`"${licenseClient}" --showEntitlements`, {
             listeners: {
                 stdout: (data) => {
                     entitlements += data.toString();
