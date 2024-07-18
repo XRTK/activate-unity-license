@@ -60,24 +60,25 @@ const client = getLicensingClient();
 
 async function execWithMask(command) {
     let output = '';
-    let error = '';
+    let exitCode = 0;
     try {
-        await exec.exec(command, [], {
+        exitCode = await exec.exec(command, [], {
             silent: true,
             listeners: {
                 stdout: (data) => {
                     output += data.toString();
                 },
                 stderr: (data) => {
-                    error += data.toString();
+                    output += data.toString();
                 }
             }
         });
 
     } finally {
-        core.info(maskSerialInOutput(output));
-        if (error !== '') {
-            throw Error(error);
+        if (exitCode !== 0) {
+            throw Error(`${output}`);
+        } else {
+            core.info(maskSerialInOutput(output));
         }
     }
 };

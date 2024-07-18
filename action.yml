@@ -24,6 +24,7 @@ inputs:
     description: "2FA (Authenticator App) key"
     required: false
     default: ''
+    deprecationMessage: 'This input is no longer required and is unused'
 
 runs:
   using: 'node20'
