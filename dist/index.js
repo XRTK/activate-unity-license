@@ -26262,6 +26262,8 @@ async function Run() {
             console.info(`::group::Returning Unity License`);
             await licensingClient.returnLicense();
             console.info(`::endgroup::`);
+        } else {
+            console.warn(`No Unity License found!`);
         }
     } catch (error) {
         core.setFailed(`Failed to deactivate license! ${error.message}`);
