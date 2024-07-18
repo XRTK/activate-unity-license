@@ -29,10 +29,10 @@ This action requires several secrets that need to be setup in the repository or 
 
 * `UNITY_USERNAME` The email address you use for your Unity Id
 * `UNITY_PASSWORD` The password you use for Unity Id access
-* `UNITY_SERIAL` Optional, but required for pro/plus activations
-* `UNITY_2FA_KEY` Optional, but required for personal activations [2FA Auth Key Setup Steps](#2fa-auth-key-setup-steps)
+* `UNITY_SERIAL` Optional, but required for pro activations
 
-> Don't forget that pro/plus licenses only support 2 active licenses at a time!
+> [!IMPORTANT]
+> Don't forget that pro licenses only support 2 active licenses at a time!
 
 ### Create Workflow file
 
@@ -41,7 +41,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 2 # Use this if you're activating pro license with matrix
+      # max-parallel: 2 # Use this if you're activating pro license with matrix
       matrix:
         include:
           - os: ubuntu-latest
@@ -52,8 +52,7 @@ jobs:
             build-targets: StandaloneOSX
 
     steps:
-      - name: checkout self
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
         # Installs the Unity Editor based on your project version text file
         # sets -> env.UNITY_EDITOR_PATH
@@ -66,25 +65,8 @@ jobs:
         # Activates the installation with the provided credentials
       - uses: xrtk/activate-unity-license@v5
         with:
-          # Required
+          license-type: 'Personal' # Chooses license type to use [ Personal, Professional ]
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
-          # Optional
-          license-type: 'Professional' # Chooses license type to use [ Personal, Professional ]
-          serial: ${{ secrets.UNITY_SERIAL }} # Required for pro/plus activations
-          auth-key: ${{ secrets.UNITY_2FA_KEY }} # required for personal activations
+          # serial: ${{ secrets.UNITY_SERIAL }} # Required for pro activations
 ```
-
-### 2FA Auth Key Setup Steps
-
-To activate new two factor authentication for your Unity account:
-
-1. Login to Unity account and navigate to `Security`
-2. Click `+` (activate) next to `Two Factor Authentication`
-3. Select `Start setup`
-4. Input password if prompted
-5. Select `Authenticator App` to receive codes, then `Next`
-6. Click `Can't Scan the barcode?`
-7. Copy the 16 character key
-8. Create new secret `UNITY_2FA_KEY` and save the generated key from the previous step
-9. Scan the QR code in your Authenticator app and verify the code.
