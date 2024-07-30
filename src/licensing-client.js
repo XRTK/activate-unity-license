@@ -19,13 +19,35 @@ const getLicensingClient = () => {
     }
 
     let licenseClientPath;
+    const [major, minor, patch] = version.split('.');
+
+    // if 2019.3 or older, use unity hub licensing client
+    if (major < 2020) {
+        switch (platform) {
+            case 'win32':
+                // C:\Program Files\Unity Hub\UnityLicensingClient_V1
+                licenseClientPath = path.resolve(editorPath, 'Unity Hub', 'UnityLicensingClient_V1');
+                break;
+            case 'darwin':
+                // /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub/UnityLicensingClient_V1
+                licenseClientPath = path.resolve(editorPath, 'Unity Hub.app', 'Contents', 'MacOS', 'Unity Hub', 'UnityLicensingClient_V1');
+                break;
+            case 'linux':
+                // ~/Applications/Unity\ Hub.AppImage/UnityLicensingClient_V1
+                licenseClientPath = path.resolve(editorPath, 'Unity Hub.AppImage', 'UnityLicensingClient_V1');
+                break;
+            default:
+                throw Error(`Unsupported platform: ${platform}`);
+        }
+
+        return licenseClientPath;
+    }
 
     switch (platform) {
         case 'win32':
             licenseClientPath = path.resolve(editorPath, 'Data', 'Resources', 'Licensing', 'Client', "Unity.Licensing.Client.exe");
             break;
         case 'darwin':
-            const [major, minor, patch] = version.split('.');
             const isOlderThan2021_3_19 = major < 2021 || (major == 2021 && minor < 3) || (major == 2021 && minor == 3 && patch < 19);
             if (isOlderThan2021_3_19) {
                 licenseClientPath = path.resolve(editorPath, 'Frameworks', 'UnityLicensingClient.app', 'Contents', 'Resources', 'Unity.Licensing.Client');

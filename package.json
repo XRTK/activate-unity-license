@@ -1,8 +1,25 @@
 {
   "name": "activate-unity-license",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "description": "An atomic GitHub Action that activates the Unity Engine license via cli with the provided secret parameters.",
-  "main": "src/index.js",
+  "author": "RageAgainstThePixel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XRTK/activate-unity-license.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/XRTK/activate-unity-license/issues"
+  },
+  "homepage": "https://github.com/XRTK/activate-unity-license",
+  "main": "dist/index.js",
+  "keywords": [
+    "unity",
+    "license",
+    "activation",
+    "github",
+    "action"
+  ],
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
@@ -13,17 +30,6 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "ncc build src/index.js -o dist --source-map --license licenses.txt"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/XRTK/activate-unity-license.git"
-  },
-  "keywords": [],
-  "author": "Stephen Hodgson",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/XRTK/activate-unity-license/issues"
-  },
-  "homepage": "https://github.com/XRTK/activate-unity-license#readme"
+    "build": "npm install && npm ci && ncc build src/index.js -o dist --source-map --license licenses.txt"
+  }
 }
