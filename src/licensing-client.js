@@ -13,8 +13,8 @@ async function getLicensingClient() {
     const editorPath = platform !== 'darwin' ? path.resolve(process.env.UNITY_EDITOR_PATH, '..') : path.resolve(process.env.UNITY_EDITOR_PATH, '..', '..');
     const hubPath = path.resolve(process.env.UNITY_HUB_PATH, '..');
     const version = process.env.UNITY_EDITOR_VERSION || editorPath.match(/(\d+\.\d+\.\d+[a-z]?\d?)/)[0];
-    core.debug(`Unity Editor Path: ${editorPath}`);
-    core.debug(`Unity Version: ${version}`);
+    core.info(`Unity Editor Path: ${editorPath}`);
+    core.info(`Unity Version: ${version}`);
 
     if (!fs.existsSync(editorPath)) {
         throw Error(`Unity Editor not found at path: ${editorPath}`);
@@ -62,7 +62,7 @@ async function getLicensingClient() {
             throw Error(`Unsupported platform: ${platform}`);
     }
 
-    core.debug(`Unity Licensing Client Path: ${licenseClientPath}`);
+    core.info(`Unity Licensing Client Path: ${licenseClientPath}`);
 
     if (!fs.existsSync(licenseClientPath)) {
         throw Error(`Unity Licensing Client not found at path: ${licenseClientPath}`);
@@ -126,60 +126,60 @@ const licensePaths = {
 };
 
 function hasExistingLicense() {
-    core.debug('Checking for existing Unity License activation...');
-    core.debug(`Platform detected: ${platform}`);
+    core.info('Checking for existing Unity License activation...');
+    core.info(`Platform detected: ${platform}`);
     const paths = licensePaths[platform];
-    core.debug(`License paths: ${paths}`);
+    core.info(`License paths: ${paths}`);
     if (!paths || paths.length < 2) {
-        core.debug(`No license paths configured for platform: ${platform} `);
+        core.info(`No license paths configured for platform: ${platform} `);
         return false;
     }
 
     const [ulfDir, licensesDir] = paths.filter(Boolean);
 
     if (!ulfDir) {
-        core.debug(`ULF Directory is not defined for ${platform}`);
+        core.info(`ULF Directory is not defined for ${platform}`);
         return false;
     }
 
     if (!licensesDir) {
-        core.debug(`Licenses Directory is not defined for ${platform}`);
+        core.info(`Licenses Directory is not defined for ${platform}`);
         return false;
     }
 
-    core.debug(`ULF Directory: ${ulfDir} `);
-    core.debug(`Licenses Directory: ${licensesDir} `);
+    core.info(`ULF Directory: ${ulfDir} `);
+    core.info(`Licenses Directory: ${licensesDir} `);
 
     // if ulf directory doesn't exist, create it and give it permissions
     if (platform === 'darwin' && !fs.existsSync(ulfDir)) {
-        core.debug(`Creating Unity license directory: ${ulfDir} `);
+        core.info(`Creating Unity license directory: ${ulfDir} `);
         fs.mkdirSync(ulfDir, { recursive: true });
         fs.chmodSync(ulfDir, 0o777);
     }
 
     const ulfPath = path.resolve(ulfDir, 'Unity_lic.ulf');
-    core.debug(`ULF Path: ${ulfPath} `);
+    core.info(`ULF Path: ${ulfPath} `);
 
     try {
         if (fs.existsSync(ulfPath)) {
-            core.debug(`Found license file at path: ${ulfPath} `);
+            core.info(`Found license file at path: ${ulfPath} `);
             return true;
         } else {
-            core.debug(`License file does not exist at path: ${ulfPath} `);
+            core.info(`License file does not exist at path: ${ulfPath} `);
         }
     } catch (error) {
-        core.debug(`Error checking ulf path: ${error.message} `);
+        core.info(`Error checking ulf path: ${error.message} `);
     }
 
     try {
         if (fs.existsSync(licensesDir)) {
-            core.debug(`Found licenses directory: ${licensesDir} `);
+            core.info(`Found licenses directory: ${licensesDir} `);
             return fs.readdirSync(licensesDir).some(f => f.endsWith('.xml'));
         } else {
-            core.debug(`Licenses directory does not exist: ${licensesDir} `);
+            core.info(`Licenses directory does not exist: ${licensesDir} `);
         }
     } catch (error) {
-        core.debug(`Error checking licenses directory: ${error.message} `);
+        core.info(`Error checking licenses directory: ${error.message} `);
     }
 
     return false;
