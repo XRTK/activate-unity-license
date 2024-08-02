@@ -28834,23 +28834,23 @@ async function execWithMask(args) {
     }
 };
 
+const licensePaths = {
+    win32: [
+        path.resolve(process.env.PROGRAMDATA || '', 'Unity'),
+        path.resolve(process.env.LOCALAPPDATA || '', 'Unity', 'licenses')
+    ],
+    darwin: [
+        path.resolve('/Library', 'Application Support', 'Unity') || '/Library/Application Support/Unity',
+        path.resolve('/Library', 'Unity', 'licenses' || 0)
+    ],
+    linux: [
+        path.resolve(process.env.HOME || '', '.local/share/unity3d/Unity'),
+        path.resolve(process.env.HOME || '', '.config/unity3d/Unity/licenses')
+    ]
+};
+
 function hasExistingLicense() {
     core.debug('Checking for existing Unity License activation...');
-
-    const licensePaths = {
-        win32: [
-            path.resolve(process.env.PROGRAMDATA || '', 'Unity'),
-            path.resolve(process.env.LOCALAPPDATA || '', 'Unity', 'licenses')
-        ],
-        darwin: [
-            path.resolve('/Library', 'Application Support', 'Unity') || '/Library/Application Support/Unity',
-            path.resolve('/Library', 'Unity', 'licenses' || 0)
-        ],
-        linux: [
-            path.resolve(process.env.HOME || '', '.local/share/unity3d/Unity'),
-            path.resolve(process.env.HOME || '', '.config/unity3d/Unity/licenses')
-        ]
-    };
 
     core.debug(`Platform detected: ${platform}`);
     const paths = licensePaths[platform];
