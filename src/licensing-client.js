@@ -1,15 +1,17 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const glob = require('@actions/glob');
 const fs = require("fs");
 const path = require('path');
 const platform = process.platform;
 
-const getLicensingClient = () => {
+async function getLicensingClient() {
     // Windows: <UnityEditorDir>\Data\Resources\Licensing\Client
     // macOS (Editor versions 2021.3.19f1 or later): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/
     // macOS (Editor versions earlier than 2021.3.19f1): <UnityEditorDir>/Contents/Frameworks/UnityLicensingClient.app/Contents/Resources/
     // Linux: <UnityEditorDir>/Data/Resources/Licensing/Client
     const editorPath = platform !== 'darwin' ? path.resolve(process.env.UNITY_EDITOR_PATH, '..') : path.resolve(process.env.UNITY_EDITOR_PATH, '..', '..');
+    const hubPath = path.resolve(process.env.UNITY_HUB_PATH, '..');
     const version = process.env.UNITY_EDITOR_VERSION || editorPath.match(/(\d+\.\d+\.\d+[a-z]?\d?)/)[0];
     core.debug(`Unity Editor Path: ${editorPath}`);
     core.debug(`Unity Version: ${version}`);
@@ -23,23 +25,21 @@ const getLicensingClient = () => {
 
     // if 2019.3 or older, use unity hub licensing client
     if (major < 2020) {
-        switch (platform) {
-            case 'win32':
-                // C:\Program Files\Unity Hub\UnityLicensingClient_V1
-                licenseClientPath = path.resolve(editorPath, 'Unity Hub', 'UnityLicensingClient_V1');
+        // C:\Program Files\Unity Hub\UnityLicensingClient_V1
+        // /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub/UnityLicensingClient_V1
+        // ~/Applications/Unity\ Hub.AppImage/UnityLicensingClient_V1
+        const hubPathPattern = path.resolve(hubPath, '**', 'UnityLicensingClient_V1');
+        core.info(`Unity Hub Path Pattern: ${hubPathPattern}`);
+        const globber = await glob.create(hubPathPattern);
+        const files = await globber.glob();
+        core.info(`Unity Hub Licensing Client Files: ${files}`);
+        for (const file of files) {
+            if (fs.existsSync(file)) {
+                fs.access(file, fs.constants.X_OK);
+                licenseClientPath = file;
                 break;
-            case 'darwin':
-                // /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub/UnityLicensingClient_V1
-                licenseClientPath = path.resolve(editorPath, 'Unity Hub.app', 'Contents', 'MacOS', 'Unity Hub', 'UnityLicensingClient_V1');
-                break;
-            case 'linux':
-                // ~/Applications/Unity\ Hub.AppImage/UnityLicensingClient_V1
-                licenseClientPath = path.resolve(editorPath, 'Unity Hub.AppImage', 'UnityLicensingClient_V1');
-                break;
-            default:
-                throw Error(`Unsupported platform: ${platform}`);
+            }
         }
-
         return licenseClientPath;
     }
 
@@ -71,22 +71,25 @@ const getLicensingClient = () => {
     return licenseClientPath;
 };
 
-const maskSerialInOutput = (output) => {
-    const serialPattern = /([\w-]+-XXXX)/g;
-    return output.replace(serialPattern, (_, serial) => {
+function maskSerialInOutput(output) {
+    return output.replace(/([\w-]+-XXXX)/g, (_, serial) => {
         const maskedSerial = serial.slice(0, -4) + `XXXX`;
         core.setSecret(maskedSerial);
         return serial;
     });
 };
 
-const client = getLicensingClient();
+const client = undefined;
 
-async function execWithMask(command) {
+async function execWithMask(args) {
     let output = '';
     let exitCode = 0;
     try {
-        exitCode = await exec.exec(command, [], {
+        if (client === undefined) {
+            client = await getLicensingClient();
+        }
+        core.info(`[command]$"${client} ${args.join(' ')}`);
+        exitCode = await exec.exec(client, args, {
             silent: true,
             listeners: {
                 stdout: (data) => {
@@ -100,7 +103,7 @@ async function execWithMask(command) {
 
     } finally {
         if (exitCode !== 0) {
-            throw Error(`${output}`);
+            throw Error(maskSerialInOutput(output));
         } else {
             core.info(maskSerialInOutput(output));
         }
@@ -130,7 +133,7 @@ function hasExistingLicense() {
     core.debug(`License paths: ${paths}`);
 
     if (!paths || paths.length < 2) {
-        core.debug(`No license paths configured for platform: ${platform}`);
+        core.debug(`No license paths configured for platform: ${platform} `);
         return false;
     }
 
@@ -146,66 +149,66 @@ function hasExistingLicense() {
         return false;
     }
 
-    core.debug(`ULF Directory: ${ulfDir}`);
-    core.debug(`Licenses Directory: ${licensesDir}`);
+    core.debug(`ULF Directory: ${ulfDir} `);
+    core.debug(`Licenses Directory: ${licensesDir} `);
 
     // if ulf directory doesn't exist, create it and give it permissions
     if (platform === 'darwin' && !fs.existsSync(ulfDir)) {
-        core.debug(`Creating Unity license directory: ${ulfDir}`);
+        core.debug(`Creating Unity license directory: ${ulfDir} `);
         fs.mkdirSync(ulfDir, { recursive: true });
         fs.chmodSync(ulfDir, 0o777);
     }
 
     const ulfPath = path.resolve(ulfDir, 'Unity_lic.ulf');
-    core.debug(`ULF Path: ${ulfPath}`);
+    core.debug(`ULF Path: ${ulfPath} `);
 
     try {
         if (fs.existsSync(ulfPath)) {
-            core.debug(`Found license file at path: ${ulfPath}`);
+            core.debug(`Found license file at path: ${ulfPath} `);
             return true;
         } else {
-            core.debug(`License file does not exist at path: ${ulfPath}`);
+            core.debug(`License file does not exist at path: ${ulfPath} `);
         }
     } catch (error) {
-        core.debug(`Error checking ulf path: ${error.message}`);
+        core.debug(`Error checking ulf path: ${error.message} `);
     }
 
     try {
         if (fs.existsSync(licensesDir)) {
-            core.debug(`Found licenses directory: ${licensesDir}`);
+            core.debug(`Found licenses directory: ${licensesDir} `);
             return fs.readdirSync(licensesDir).some(f => f.endsWith('.xml'));
         } else {
-            core.debug(`Licenses directory does not exist: ${licensesDir}`);
+            core.debug(`Licenses directory does not exist: ${licensesDir} `);
         }
     } catch (error) {
-        core.debug(`Error checking licenses directory: ${error.message}`);
+        core.debug(`Error checking licenses directory: ${error.message} `);
     }
 
     return false;
 }
 
 async function version() {
-    await execWithMask(`"${client}" --version`);
+    await execWithMask([`--version`]);
 }
 
 async function showEntitlements() {
-    await execWithMask(`"${client}" --showEntitlements`);
+    await execWithMask([`--showEntitlements`]);
 }
 
 async function activateLicense(username, password, serial) {
-    let args = `--activate-ulf --username "${username}" --password "${password}"`;
+    const args = [`--activate`, `--ulf--username`, `"${username}"`, `--password`, `"${password}"`];
 
     if (serial !== undefined && serial !== '') {
-        args += ` --serial "${serial}"`;
+        args.push([`--serial`, `"${serial}"`]);
         const maskedSerial = serial.slice(0, -4) + `XXXX`;
         core.setSecret(maskedSerial);
     }
 
-    await execWithMask(`"${client}" ${args}`);
+    await execWithMask(args);
 }
 
 async function returnLicense() {
-    await execWithMask(`"${client}" --return-ulf`);
+    await execWithMask([`--return-ulf`]);
     await showEntitlements();
 }
 
