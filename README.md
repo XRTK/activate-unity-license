@@ -1,5 +1,8 @@
 # activate-unity-license
 
+> [!IMPORTANT]
+> The action is no longer be maintained and has been moved to [buildalon/activate-unity-license](https://github.com/buildalon/activate-unity-license)
+
 An atomic GitHub Action that activates the Unity Engine license via cli with the provided secret parameters.
 
 Part of the [Mixed Reality Toolkit (XRTK)](https://github.com/XRTK) open source project.
